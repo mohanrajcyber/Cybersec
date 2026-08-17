@@ -29,7 +29,7 @@ export default function App() {
   return (
     <AuthProvider>
       <LabSettingsProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '') || undefined}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={

@@ -33,6 +33,12 @@ npm run dev
 
 Browser-la open pannunga: **http://localhost:5173**
 
+### Live link (GitHub Pages — install venaam)
+
+**https://mohanrajcyber.github.io/Cybersec/**
+
+Phone browser-la direct open pannalam.
+
 > **Phone-la use pannunga?** Chrome/Safari mobile browser-la open pannalam — bottom navigation (Home, War Room, Bootcamp, CTF) + **More** menu irukku. App full mobile layout-ku set pannirukku.
 
 > Port busy na automatic-a **5174** use aagum — terminal-la exact URL parunga.
