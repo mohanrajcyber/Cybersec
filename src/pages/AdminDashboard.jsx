@@ -1,0 +1,352 @@
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { modules } from '../data/modules'
+import { BADGES } from '../data/badges'
+import { getAllStudentAccounts, saveStudentAccount, bulkSaveStudentAccounts } from '../utils/studentAuth'
+import { getPasswordStrength } from '../utils/passwordStrength'
+import { getLabCompletionStats, exportProgressJson } from '../utils/classProgress'
+import { generateReportCard } from '../utils/reportCard'
+import { buildStudentLoginUrl, generateQrDataUrl } from '../utils/qrLogin'
+import { ICT_SESSION } from '../data/sessionPlan'
+import PasswordStrengthBox from '../components/PasswordStrengthBox'
+import StudentTableControls, { applyStudentFilters } from '../components/StudentTableControls'
+
+function mergeStudentRows(accounts, students) {
+  const progressMap = new Map(students.map((s) => [s.username, s]))
+  const accountUsernames = new Set(accounts.map((a) => a.username))
+  const merged = accounts.map((acc) => {
+    const progress = progressMap.get(acc.username) || {}
+    return {
+      ...acc,
+      ...progress,
+      username: acc.username,
+      strength: getPasswordStrength(acc.password),
+    }
+  })
+
+  students.forEach((s) => {
+    if (!accountUsernames.has(s.username)) {
+      merged.push({
+        ...s,
+        password: '—',
+        displayName: s.name,
+        strength: getPasswordStrength('—'),
+      })
+    }
+  })
+
+  return merged.sort((a, b) =>
+    (a.displayName || a.name || a.username).localeCompare(b.displayName || b.name || b.username, undefined, { sensitivity: 'base' })
+  )
+}
+
+function StrengthCell({ strength }) {
+  if (!strength || strength.cls === 'none') return <span className="pw-strength-empty">—</span>
+  return (
+    <span className={`pw-strength-inline pw-strength-inline--${strength.cls}`}>
+      <span className="pw-strength-bars">
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className={`pw-strength-bar ${i < strength.bars ? `on s${strength.score}` : ''}`} />
+        ))}
+      </span>
+      <span className={`pw-strength-label strength-${strength.cls}`}>{strength.text}</span>
+    </span>
+  )
+}
+
+function QrModal({ student, onClose }) {
+  const [qrUrl, setQrUrl] = useState('')
+  const loginUrl = student?.password && student.password !== '—'
+    ? buildStudentLoginUrl(student.username, student.password)
+    : ''
+
+  useEffect(() => {
+    if (!loginUrl) return
+    generateQrDataUrl(loginUrl).then(setQrUrl)
+  }, [loginUrl])
+
+  if (!student) return null
+
+  return (
+    <div className="admin-qr-overlay" onClick={onClose} role="presentation">
+      <div className="admin-qr-modal panel" onClick={(e) => e.stopPropagation()}>
+        <div className="panel-title">📱 QR Login — @{student.username}</div>
+        <p className="field-hint">{student.displayName || student.name || student.username}</p>
+        {qrUrl ? (
+          <>
+            <img src={qrUrl} alt={`QR login for ${student.username}`} className="admin-qr-img" />
+            <p className="field-hint">Student scans with phone camera → auto login</p>
+            <code className="admin-qr-url">{loginUrl}</code>
+          </>
+        ) : (
+          <p className="feedback error">No password on file — cannot generate QR</p>
+        )}
+        <button type="button" className="btn btn-outline" onClick={onClose}>Close</button>
+      </div>
+    </div>
+  )
+}
+
+export default function AdminDashboard() {
+  const { getAllStudents, trainer, logout } = useAuth()
+  const [form, setForm] = useState({ username: '', password: '', displayName: '' })
+  const [bulkText, setBulkText] = useState('')
+  const [showBulk, setShowBulk] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [err, setErr] = useState('')
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('name-asc')
+  const [strengthFilter, setStrengthFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [refresh, setRefresh] = useState(0)
+  const [labStats, setLabStats] = useState(() => getLabCompletionStats())
+  const [qrStudent, setQrStudent] = useState(null)
+
+  const students = useMemo(() => getAllStudents(), [refresh])
+  const accounts = useMemo(() => getAllStudentAccounts(), [refresh])
+
+  const refreshAll = useCallback(() => {
+    setRefresh((n) => n + 1)
+    setLabStats(getLabCompletionStats())
+  }, [])
+
+  useEffect(() => {
+    const id = setInterval(() => setLabStats(getLabCompletionStats()), 4000)
+    return () => clearInterval(id)
+  }, [])
+
+  const merged = useMemo(() => mergeStudentRows(accounts, students), [accounts, students])
+
+  const filtered = useMemo(
+    () => applyStudentFilters(merged, { search, sortBy, strengthFilter, statusFilter }),
+    [merged, search, sortBy, strengthFilter, statusFilter]
+  )
+
+  const bootcampComplete = useMemo(
+    () =>
+      students.filter((s) => {
+        const all = Object.values(s.bootcamp || {}).flatMap((d) => Object.values(d))
+        return all.length && all.every(Boolean)
+      }).length,
+    [students]
+  )
+
+  const handleAdd = (e) => {
+    e.preventDefault()
+    setErr('')
+    setMsg('')
+    const res = saveStudentAccount(form.username, form.password, form.displayName)
+    if (!res.ok) {
+      setErr(res.error)
+      return
+    }
+    setMsg(`Student @${res.username} saved successfully!`)
+    setForm({ username: '', password: '', displayName: '' })
+    refreshAll()
+  }
+
+  const handleBulk = (e) => {
+    e.preventDefault()
+    setErr('')
+    setMsg('')
+    const res = bulkSaveStudentAccounts(bulkText)
+    if (!res.ok) {
+      setErr(res.error)
+      return
+    }
+    let text = `Imported ${res.total} student${res.total === 1 ? '' : 's'} (${res.added} new, ${res.updated} updated).`
+    if (res.errors?.length) text += ` ${res.errors.length} line(s) skipped.`
+    setMsg(text)
+    setBulkText('')
+    setShowBulk(false)
+    refreshAll()
+  }
+
+  const handleSearch = (value) => {
+    setSearch(value)
+  }
+
+  return (
+    <div className="admin-page">
+      <div className="admin-header">
+        <div>
+          <h1>Trainer Dashboard</h1>
+          <p>Welcome, {trainer.name} — {ICT_SESSION.program} · Batch {ICT_SESSION.batchId}</p>
+        </div>
+        <button type="button" className="btn btn-outline" onClick={logout}>Logout</button>
+      </div>
+
+      <div className="panel admin-create-panel">
+        <div className="panel-title">➕ Create Student Login</div>
+        <p className="field-hint">
+          Single student or bulk import — unlimited students, all shown in list.
+        </p>
+        <form className="admin-create-form" onSubmit={handleAdd}>
+          <div className="admin-form-field">
+            <label>Username</label>
+            <input
+              className="field-input"
+              placeholder="e.g. arun"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              required
+            />
+          </div>
+          <div className="admin-form-field admin-form-field--password">
+            <label>Password</label>
+            <input
+              className="field-input"
+              type="text"
+              placeholder="e.g. 1234 or cyber2026"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+            />
+            {form.password && (
+              <div className="admin-pw-preview">
+                <PasswordStrengthBox password={form.password} />
+              </div>
+            )}
+          </div>
+          <div className="admin-form-field">
+            <label>Display Name (optional)</label>
+            <input
+              className="field-input"
+              placeholder="e.g. Arun Kumar"
+              value={form.displayName}
+              onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">Save Student Login</button>
+        </form>
+
+        <div className="admin-bulk-section">
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => setShowBulk((v) => !v)}
+          >
+            {showBulk ? 'Hide bulk import' : 'Bulk import (1000+ students)'}
+          </button>
+          {showBulk && (
+            <form className="admin-bulk-form" onSubmit={handleBulk}>
+              <label className="field-hint">
+                One student per line: <code>username,password,name</code>
+              </label>
+              <textarea
+                className="field-input admin-bulk-textarea"
+                rows={8}
+                placeholder={'student001,pass1234,Student One\nstudent002,pass1234,Student Two\nstudent003,pass1234,Student Three'}
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+              />
+              <button type="submit" className="btn btn-primary btn-sm">Import all lines</button>
+            </form>
+          )}
+        </div>
+
+        {msg && <div className="feedback success" style={{ marginTop: '1rem' }}>{msg}</div>}
+        {err && <div className="feedback error" style={{ marginTop: '1rem' }}>{err}</div>}
+        <p className="login-hint" style={{ marginTop: '1rem' }}>
+          Student login: <code>/login</code>
+        </p>
+      </div>
+
+      <div className="stats-row">
+        <div className="stat-card"><span className="stat-icon">👥</span><div><div className="stat-value">{accounts.length}</div><div className="stat-label">Student Logins</div></div></div>
+        <div className="stat-card"><span className="stat-icon">📚</span><div><div className="stat-value">{modules.length - 1}</div><div className="stat-label">Training Modules</div></div></div>
+        <div className="stat-card"><span className="stat-icon">🏅</span><div><div className="stat-value">{BADGES.length}</div><div className="stat-label">Badge Types</div></div></div>
+        <div className="stat-card"><span className="stat-icon">🎓</span><div><div className="stat-value">{bootcampComplete}</div><div className="stat-label">Bootcamp Complete</div></div></div>
+      </div>
+
+      <div className="panel admin-live-panel">
+        <div className="panel-header-row">
+          <div className="panel-title">📊 Live Lab Progress</div>
+          <div className="admin-live-actions">
+            <button type="button" className="btn btn-outline btn-sm" onClick={refreshAll}>↻ Refresh</button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => generateReportCard(merged)}>📄 Report Card PDF</button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={exportProgressJson}>⬇ Export JSON</button>
+          </div>
+        </div>
+        <p className="field-hint">Auto-updates every 4 seconds — who completed each lab in this browser</p>
+        <div className="admin-lab-stats-grid">
+          {labStats.map((lab) => (
+            <div key={lab.id} className="admin-lab-stat-card">
+              <strong>{lab.label}</strong>
+              <span className="admin-lab-stat-count">{lab.completed}/{lab.total}</span>
+              <div className="vm-progress-bar"><div style={{ width: `${lab.pct}%` }} /></div>
+              <span className="field-hint">{lab.pct}% complete</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {qrStudent && <QrModal student={qrStudent} onClose={() => setQrStudent(null)} />}
+
+      <div className="panel">
+        <div className="panel-title">All Students — Username & Password</div>
+        {merged.length === 0 ? (
+          <p className="field-hint">No students yet — use the form above to create logins.</p>
+        ) : (
+          <>
+            <StudentTableControls
+              total={merged.length}
+              filtered={filtered.length}
+              search={search}
+              onSearch={handleSearch}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              strengthFilter={strengthFilter}
+              onStrengthFilterChange={setStrengthFilter}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+            />
+            <div className="table-wrap admin-table-scroll">
+              <table className="scan-table admin-table admin-student-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Strength</th>
+                    <th>Name</th>
+                    <th>Score</th>
+                    <th>Labs</th>
+                    <th>Badges</th>
+                    <th>Last Login</th>
+                    <th>QR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((s, i) => (
+                    <tr key={s.username} className="admin-student-row">
+                      <td className="admin-row-num">{i + 1}</td>
+                      <td><code>@{s.username}</code></td>
+                      <td>
+                        {s.password && s.password !== '—'
+                          ? <code className="pw-cell">{s.password}</code>
+                          : <span className="pw-strength-empty">—</span>}
+                      </td>
+                      <td><StrengthCell strength={s.strength} /></td>
+                      <td>{s.displayName || s.name || '—'}</td>
+                      <td><strong>{s.score ?? 0}%</strong></td>
+                      <td>{s.completedLabs?.length || 0}</td>
+                      <td>{s.badges?.length || 0}</td>
+                      <td>{s.lastLogin ? new Date(s.lastLogin).toLocaleDateString('en-IN') : 'Not yet'}</td>
+                      <td>
+                        <button type="button" className="btn btn-outline btn-sm" onClick={() => setQrStudent(s)} title="Show QR login">QR</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {filtered.length === 0 && (search || strengthFilter !== 'all' || statusFilter !== 'all') && (
+              <p className="field-hint" style={{ marginTop: '1rem' }}>No students match the current search or filters.</p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
