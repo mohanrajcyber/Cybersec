@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import PageShell from '../components/PageShell'
-import { logBurpEvent, getBurpLogs, buildHttpRaw } from '../utils/burpSuiteLog'
+import BurpProxyPanel from '../components/BurpProxyPanel'
+import { logBurpEvent, getBurpLogs, clearBurpLogs, removeBurpLog } from '../utils/burpSuiteLog'
 import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGoogleSearch'
 
 const HOME_URL = 'https://www.google.com/'
@@ -426,6 +427,7 @@ export default function BurpSuiteLab() {
   const [proxyOn, setProxyOn] = useState(true)
   const [useRealHtml, setUseRealHtml] = useState(true)
   const [viewSource, setViewSource] = useState(null)
+  const [interceptPending, setInterceptPending] = useState(null)
   const loggedOpen = useRef(false)
   const loadTimer = useRef(null)
   const historyIndexRef = useRef(0)
@@ -462,10 +464,17 @@ export default function BurpSuiteLab() {
   }, [username, displayName, markModuleVisited, refreshLogs])
 
   useEffect(() => {
-    const handler = () => refreshLogs()
+    const handler = (e) => {
+      refreshLogs()
+      const entry = e.detail
+      if (entry && proxyOn) {
+        setInterceptPending(entry)
+        setSelectedLog(entry)
+      }
+    }
     window.addEventListener('burp-log-update', handler)
     return () => window.removeEventListener('burp-log-update', handler)
-  }, [refreshLogs])
+  }, [refreshLogs, proxyOn])
 
   useEffect(() => () => {
     if (loadTimer.current) clearTimeout(loadTimer.current)
@@ -683,6 +692,24 @@ export default function BurpSuiteLab() {
     capture({ action: 'click', method: 'GET', url: '/open-external', query: q, target: 'Open Live Google', host: 'www.google.com', details: `window.open → ${liveUrl}` })
   }
 
+  const handleForwardIntercept = () => setInterceptPending(null)
+
+  const handleDropIntercept = () => {
+    if (interceptPending) {
+      removeBurpLog(interceptPending.id)
+      setInterceptPending(null)
+      refreshLogs()
+      setSelectedLog(null)
+    }
+  }
+
+  const handleClearBurpHistory = () => {
+    clearBurpLogs()
+    setInterceptPending(null)
+    setSelectedLog(null)
+    refreshLogs()
+  }
+
   const myLogs = logs.filter((l) => l.studentUsername === username)
   const sessionStats = {
     requests: myLogs.length,
@@ -816,54 +843,18 @@ export default function BurpSuiteLab() {
 
         <ViewSourceModal source={viewSource} onClose={() => setViewSource(null)} />
 
-        <div className="burp-proxy-panel">
-          <div className="burp-proxy-head">
-            <span>🔶 Burp Suite — Proxy / HTTP History</span>
-            <span className="burp-proxy-count">{logs.length} total · {myLogs.length} yours</span>
-          </div>
-          <div className="burp-proxy-split">
-            <div className="burp-history-list">
-              {logs.length === 0 && <p className="burp-empty">No traffic yet — search on Google to intercept requests</p>}
-              {[...logs].reverse().slice(0, 40).map((entry) => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className={`burp-history-item ${selectedLog?.id === entry.id ? 'active' : ''} action-${entry.action}`}
-                  onClick={() => setSelectedLog(entry)}
-                >
-                  <span className="burp-h-time">{entry.time}</span>
-                  <span className="burp-h-method">{entry.method}</span>
-                  <span className="burp-h-path">
-                    {entry.host && entry.host !== 'www.google.com' ? `${entry.host}${entry.url}` : (entry.action === 'search' ? `/search?q=${entry.query}` : entry.url)}
-                  </span>
-                  <span className="burp-h-user">@{entry.studentUsername}</span>
-                </button>
-              ))}
-            </div>
-            <div className="burp-request-view">
-              {selectedLog ? (
-                <>
-                  <div className="burp-req-meta">
-                    <span className={`burp-action-tag ${selectedLog.action}`}>{selectedLog.action}</span>
-                    <strong>{selectedLog.studentName}</strong> · @{selectedLog.studentUsername}
-                    {selectedLog.host && <span className="burp-req-host"> · {selectedLog.host}</span>}
-                  </div>
-                  <pre className="burp-raw-http">{buildHttpRaw(selectedLog)}</pre>
-                  {selectedLog.query && (
-                    <div className="burp-highlight">
-                      🔍 Search query captured: <code>{selectedLog.query}</code>
-                    </div>
-                  )}
-                  {selectedLog.target && (
-                    <div className="burp-highlight dim">Target: {selectedLog.target}</div>
-                  )}
-                </>
-              ) : (
-                <p className="burp-empty">Select a request to view raw HTTP</p>
-              )}
-            </div>
-          </div>
-        </div>
+        <BurpProxyPanel
+          logs={logs}
+          myLogs={myLogs}
+          selectedLog={selectedLog}
+          onSelectLog={setSelectedLog}
+          interceptPending={interceptPending}
+          proxyOn={proxyOn}
+          onForward={handleForwardIntercept}
+          onDrop={handleDropIntercept}
+          onClearHistory={handleClearBurpHistory}
+          username={username}
+        />
       </div>
     </PageShell>
   )
