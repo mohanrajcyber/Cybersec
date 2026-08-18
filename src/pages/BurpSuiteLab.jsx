@@ -11,8 +11,8 @@ const REAL_GOOGLE_HOME = `${import.meta.env.BASE_URL || '/'}google-real-home.htm
 
 const LANG_LINKS = ['हिन्दी', 'বাংলা', 'తెలుగు', 'मराठी', 'தமிழ்', 'ગુજરાતી', 'ಕನ್ನಡ', 'മലയാളം', 'ਪੰਜਾਬੀ']
 const AI_CHIPS = [
-  { id: 'create-images', label: 'Create images', icon: '✋' },
-  { id: 'ask-files', label: 'Ask about files', icon: '📄' },
+  { id: 'create-images', label: 'Create images', icon: '✨' },
+  { id: 'ask-files', label: 'Ask about files', icon: '📎' },
   { id: 'brainstorm', label: 'Brainstorm', icon: '💡' },
   { id: 'lucky', label: 'I am feeling lucky', icon: null },
 ]
@@ -166,8 +166,10 @@ function BrowserChrome({
         {loading && <span className="burp-url-spinner" aria-hidden />}
       </form>
       <div className="burp-chrome-actions">
-        {useRealHtml && (
-          <span className="burp-real-badge" title="Using captured google.com HTML">Real HTML</span>
+        {useRealHtml ? (
+          <span className="burp-real-badge burp-real-badge--legacy" title="Legacy captured HTML">Legacy HTML</span>
+        ) : (
+          <span className="burp-real-badge" title="Google 2026 interface">Google 2026</span>
         )}
         <button type="button" className="burp-open-real-btn" onClick={onOpenRealGoogle} title="Open on live Google.com">
           Open Live ↗
@@ -425,7 +427,7 @@ export default function BurpSuiteLab() {
   const [logs, setLogs] = useState(() => getBurpLogs())
   const [selectedLog, setSelectedLog] = useState(null)
   const [proxyOn, setProxyOn] = useState(true)
-  const [useRealHtml, setUseRealHtml] = useState(true)
+  const [useRealHtml, setUseRealHtml] = useState(false)
   const [viewSource, setViewSource] = useState(null)
   const [interceptPending, setInterceptPending] = useState(null)
   const loggedOpen = useRef(false)
@@ -547,7 +549,6 @@ export default function BurpSuiteLab() {
       setHistoryIndex(replace ? idx : idx + 1)
       setUrlInput(page.url)
       if (page.query) setSearchInput(page.query)
-      setUseRealHtml(page.type === 'home')
       logForPage(page, logExtra)
       setLoading(false)
       if (page.type === 'search') completeLab('burp-suite')
@@ -774,7 +775,7 @@ export default function BurpSuiteLab() {
     <PageShell
       icon="🔶"
       title="Burp Suite Proxy Lab"
-      description="Realistic browser simulation — back, forward, URL bar, search & site navigation. Every request intercepted like Burp Proxy."
+      description="Real Google 2026 interface — AI Mode, search chips, results & Burp intercept. Every click and search logged for trainer review."
       badge="HTTP Intercept · Lab Safe"
       badgeVariant="safe"
       detailsSections={[
@@ -798,20 +799,23 @@ export default function BurpSuiteLab() {
         <div className="burp-mode-toggle">
           <button
             type="button"
+            className={`btn btn-sm ${!useRealHtml ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => {
+              setUseRealHtml(false)
+              if (currentPage.type !== 'home') navigateTo(homePage())
+            }}
+          >
+            Google 2026
+          </button>
+          <button
+            type="button"
             className={`btn btn-sm ${useRealHtml ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => {
               setUseRealHtml(true)
               if (currentPage.type !== 'home') navigateTo(homePage())
             }}
           >
-            Real Google HTML
-          </button>
-          <button
-            type="button"
-            className={`btn btn-sm ${!useRealHtml ? 'btn-primary' : 'btn-outline'}`}
-            onClick={() => setUseRealHtml(false)}
-          >
-            Lab Simulation
+            Legacy HTML
           </button>
         </div>
       </div>

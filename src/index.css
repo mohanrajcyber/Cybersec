@@ -4268,6 +4268,7 @@ body.war-room-open { overflow: hidden; background: #050810; }
   font-size: 0.5625rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
   padding: 0.2rem 0.45rem; border-radius: 4px; background: #dcfce7; color: #166534; border: 1px solid #86efac;
 }
+.burp-real-badge--legacy { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
 .burp-open-real-btn {
   border: 1px solid #dadce0; background: #fff; color: #1a73e8; font-size: 0.625rem; font-weight: 600;
   padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; white-space: nowrap;
@@ -4377,15 +4378,16 @@ body.war-room-open { overflow: hidden; background: #050810; }
 .burp-lock { font-size: 0.625rem; flex-shrink: 0; }
 
 .burp-browser-wrap--google { border: none; box-shadow: 0 1px 6px rgba(32, 33, 36, 0.18); }
-.burp-google-page { min-height: 520px; background: #fff; color: #202124; display: flex; flex-direction: column; font-family: arial, sans-serif; }
+.burp-google-page { min-height: 560px; background: #fff; color: #202124; display: flex; flex-direction: column; font-family: arial, sans-serif; }
 
 /* ── Google Home v2 (real layout) ── */
 .burp-google-home-v2 {
-  display: flex; flex-direction: column; min-height: 520px; background: #fff;
+  display: flex; flex-direction: column; min-height: 560px; background: #fff;
+  font-family: arial, sans-serif;
 }
 .burp-g-topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0.85rem 1.1rem 0.35rem; font-size: 0.8125rem;
+  padding: 1rem 1.25rem 0.5rem; font-size: 0.8125rem;
 }
 .burp-g-topbar-left, .burp-g-topbar-right {
   display: flex; align-items: center; gap: 0.85rem;
@@ -4409,32 +4411,32 @@ body.war-room-open { overflow: hidden; background: #050810; }
 .burp-g-profile:hover { box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3); }
 
 .burp-g-main {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 2.5rem 1rem 1.5rem;
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 1.5rem 1rem 2rem; margin-top: -2rem;
 }
 .burp-g-logo {
-  font-size: 5.5rem; font-weight: 400; letter-spacing: -3px; margin-bottom: 1.75rem;
-  font-family: 'Product Sans', arial, sans-serif; line-height: 1;
+  font-size: clamp(4rem, 11vw, 6.5rem); font-weight: 400; letter-spacing: -4px; margin-bottom: 2rem;
+  font-family: 'Product Sans', arial, sans-serif; line-height: 1; user-select: none;
 }
 .burp-g-logo.small { font-size: 1.875rem; margin: 0; letter-spacing: -1px; }
 .burp-g-logo .b { color: #4285f4; } .burp-g-logo .r { color: #ea4335; }
 .burp-g-logo .y { color: #fbbc05; } .burp-g-logo .b2 { color: #4285f4; }
 .burp-g-logo .g { color: #34a853; } .burp-g-logo .r2 { color: #ea4335; }
 
-.burp-g-search-form-v2 { width: 100%; max-width: 584px; }
+.burp-g-search-form-v2 { width: 100%; max-width: 690px; }
 .burp-g-search-form-v2.inline { flex: 1; max-width: 692px; }
 .burp-g-search-box-v2 {
-  display: flex; align-items: center; gap: 0.35rem;
-  padding: 0.55rem 0.85rem; border-radius: 999px;
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.65rem 1rem; border-radius: 999px;
   border: 1px solid #dfe1e5; background: #fff;
   box-shadow: 0 2px 8px 1px rgba(64, 60, 67, 0.08);
-  transition: box-shadow 0.2s;
-  margin-bottom: 0.85rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  margin-bottom: 1rem; min-height: 50px;
 }
 .burp-g-search-box-v2:hover,
 .burp-g-search-box-v2:focus-within {
-  box-shadow: 0 2px 12px 2px rgba(64, 60, 67, 0.12);
-  border-color: transparent;
+  box-shadow: 0 2px 14px 3px rgba(64, 60, 67, 0.14);
+  border-color: #dfe1e5;
 }
 .burp-g-search-box-v2.small { padding: 0.35rem 0.75rem; margin-bottom: 0; max-height: 44px; }
 .burp-g-search-plus {
@@ -4442,8 +4444,8 @@ body.war-room-open { overflow: hidden; background: #050810; }
   color: #5f6368; font-size: 1.25rem; cursor: pointer; flex-shrink: 0; line-height: 1;
 }
 .burp-g-search-box-v2 input {
-  flex: 1; border: none; outline: none; font-size: 1rem; background: transparent;
-  color: #202124; font-family: arial, sans-serif; min-width: 0;
+  flex: 1; border: none; outline: none; font-size: 1.0625rem; background: transparent;
+  color: #202124; font-family: arial, sans-serif; min-width: 0; line-height: 1.4;
 }
 .burp-g-search-box-v2.small input { font-size: 0.9375rem; }
 .burp-g-search-tools { display: flex; align-items: center; gap: 0.15rem; flex-shrink: 0; }
@@ -4453,27 +4455,26 @@ body.war-room-open { overflow: hidden; background: #050810; }
 }
 .burp-g-tool-btn:hover { background: rgba(60, 64, 67, 0.08); }
 .burp-g-ai-mode {
-  display: flex; align-items: center; gap: 0.25rem;
-  padding: 0.35rem 0.75rem; border-radius: 999px; border: none; cursor: pointer;
-  background: linear-gradient(135deg, #e8f0fe, #f3e8fd);
-  color: #1a73e8; font-size: 0.8125rem; font-weight: 500; font-family: arial, sans-serif;
-  margin-left: 0.15rem; white-space: nowrap;
+  display: flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 0.85rem; border-radius: 999px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #e8f0fe 0%, #f3e8fd 100%);
+  color: #1a73e8; font-size: 0.875rem; font-weight: 500; font-family: arial, sans-serif;
+  margin-left: 0.25rem; white-space: nowrap;
 }
-.burp-g-ai-mode:hover { background: linear-gradient(135deg, #d2e3fc, #e9d5fd); }
-.burp-g-ai-sparkle { font-size: 0.875rem; color: #4285f4; }
+.burp-g-ai-sparkle { font-size: 0.9375rem; color: #4285f4; font-weight: 700; }
 
 .burp-g-ai-chips {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.65rem;
+  margin-bottom: 2rem; max-width: 720px;
 }
 .burp-g-chip {
-  display: inline-flex; align-items: center; gap: 0.35rem;
-  padding: 0.55rem 1rem; border-radius: 999px; border: none; cursor: pointer;
-  background: #f0f4f9; color: #202124; font-size: 0.8125rem; font-family: arial, sans-serif;
-  transition: background 0.15s;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.625rem 1.125rem; border-radius: 999px; border: none; cursor: pointer;
+  background: #f0f4f9; color: #202124; font-size: 0.875rem; font-family: arial, sans-serif;
+  transition: background 0.15s, box-shadow 0.15s; white-space: nowrap;
 }
-.burp-g-chip:hover { background: #e2e8f0; }
-.burp-g-chip-icon { font-size: 0.9375rem; }
+.burp-g-chip:hover { background: #e8eaed; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); }
+.burp-g-chip-icon { font-size: 1rem; line-height: 1; }
 
 .burp-g-langs {
   font-size: 0.8125rem; color: #3c4043; text-align: center; line-height: 1.8;
@@ -4798,7 +4799,8 @@ body.war-room-open { overflow: hidden; background: #050810; }
   }
   .burp-history-table-head span:last-child,
   .burp-history-row .burp-h-mime { display: none; }
-  .burp-history-list { max-height: 200px; border-right: none; border-bottom: 1px solid #44403c; }
+  .burp-proxy-split,
+  .burp-proxy-split-v2 { grid-template-columns: 1fr; }
   .burp-g-logo { font-size: 4rem; }
   .burp-google-page { min-height: 480px; }
   .burp-g-footer-links { flex-direction: column; }
