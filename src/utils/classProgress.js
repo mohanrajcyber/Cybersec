@@ -10,6 +10,7 @@ export const TRACKED_LABS = [
   { id: 'scam-sim', label: 'UPI Scam Sim', path: '/lab/scam-sim' },
   { id: 'footprint', label: 'Digital Footprint', path: '/lab/footprint' },
   { id: 'recon', label: 'Recon Lab', path: '/recon' },
+  { id: 'burp-suite', label: 'Burp Suite Lab', path: '/burp-suite' },
   { id: 'network', label: 'Network Analysis', path: '/network' },
 ]
 

@@ -24,6 +24,7 @@ import InfoLookup from './pages/InfoLookup'
 import VmChecklist from './pages/VmChecklist'
 import CheatSheet from './pages/CheatSheet'
 import CyberWarRoom from './pages/CyberWarRoom'
+import BurpSuiteLab from './pages/BurpSuiteLab'
 
 export default function App() {
   return (
@@ -60,6 +61,7 @@ export default function App() {
                   <Route path="/info" element={<InfoLookup />} />
                   <Route path="/checklist" element={<VmChecklist />} />
                   <Route path="/cheatsheet" element={<CheatSheet />} />
+                  <Route path="/burp-suite" element={<BurpSuiteLab />} />
                   <Route path="/progress" element={<GenericModule moduleId="progress" />} />
                   <Route path="/lab/:labId" element={<SimLab />} />
                   <Route path="/leaderboard" element={<Leaderboard />} />

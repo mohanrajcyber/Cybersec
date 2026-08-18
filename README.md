@@ -17,8 +17,8 @@ A professional, browser-based cyber security training platform built for **ICT A
 
 **Option A — Git clone**
 ```bash
-git clone https://github.com/YOUR_USERNAME/cybersec-arena.git
-cd cybersec-arena
+git clone https://github.com/mohanrajcyber/Cybersec.git
+cd Cybersec
 ```
 
 **Option B — ZIP download**  

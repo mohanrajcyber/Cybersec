@@ -4224,3 +4224,301 @@ body.war-room-open { overflow: hidden; background: #050810; }
   .war-btn-try-student { min-width: 100%; }
 }
 
+/* ── Burp Suite Proxy Lab ── */
+.burp-lab-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;
+  margin-bottom: 1rem; padding: 0.65rem 0.85rem; border-radius: var(--radius);
+  background: linear-gradient(90deg, #fff7ed, #ffedd5); border: 1px solid #fdba74;
+}
+[data-theme="dark"] .burp-lab-toolbar { background: linear-gradient(90deg, #431407, #292524); border-color: #9a3412; }
+.burp-proxy-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
+.burp-proxy-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #94a3b8;
+}
+.burp-proxy-dot.on { background: #ea580c; box-shadow: 0 0 8px #f97316; animation: warLiveBlink 1.5s infinite; }
+.burp-session-stats { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--text-2); }
+.burp-session-stats strong { color: #ea580c; }
+
+.burp-lab-stage {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start;
+}
+.burp-browser-wrap {
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+  box-shadow: var(--shadow-md); background: #fff;
+}
+.burp-browser-chrome {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.65rem;
+  background: #e8eaed; border-bottom: 1px solid #dadce0;
+}
+.burp-url-bar {
+  flex: 1; display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.35rem 0.65rem; border-radius: 999px; background: #fff;
+  font-size: 0.6875rem; color: #202124; font-family: var(--mono); overflow: hidden;
+  white-space: nowrap; text-overflow: ellipsis;
+}
+.burp-lock { font-size: 0.625rem; }
+
+.burp-browser-wrap--google { border: none; box-shadow: 0 1px 6px rgba(32, 33, 36, 0.18); }
+.burp-google-page { min-height: 520px; background: #fff; color: #202124; display: flex; flex-direction: column; font-family: arial, sans-serif; }
+
+/* ── Google Home v2 (real layout) ── */
+.burp-google-home-v2 {
+  display: flex; flex-direction: column; min-height: 520px; background: #fff;
+}
+.burp-g-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 1.1rem 0.35rem; font-size: 0.8125rem;
+}
+.burp-g-topbar-left, .burp-g-topbar-right {
+  display: flex; align-items: center; gap: 0.85rem;
+}
+.burp-g-topbar button {
+  background: none; border: none; color: rgba(0, 0, 0, 0.87); cursor: pointer;
+  font-size: 0.8125rem; padding: 0.15rem 0.25rem; font-family: arial, sans-serif;
+}
+.burp-g-topbar button:hover { text-decoration: underline; }
+.burp-g-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; color: #5f6368;
+}
+.burp-g-icon-btn:hover { background: rgba(60, 64, 67, 0.08); text-decoration: none !important; }
+.burp-g-profile {
+  width: 32px !important; height: 32px !important; border-radius: 50% !important;
+  background: #1a73e8 !important; color: #fff !important; font-weight: 700 !important;
+  font-size: 0.875rem !important; display: flex !important; align-items: center; justify-content: center;
+  padding: 0 !important; text-decoration: none !important;
+}
+.burp-g-profile:hover { box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3); }
+
+.burp-g-main {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 2.5rem 1rem 1.5rem;
+}
+.burp-g-logo {
+  font-size: 5.5rem; font-weight: 400; letter-spacing: -3px; margin-bottom: 1.75rem;
+  font-family: 'Product Sans', arial, sans-serif; line-height: 1;
+}
+.burp-g-logo.small { font-size: 1.875rem; margin: 0; letter-spacing: -1px; }
+.burp-g-logo .b { color: #4285f4; } .burp-g-logo .r { color: #ea4335; }
+.burp-g-logo .y { color: #fbbc05; } .burp-g-logo .b2 { color: #4285f4; }
+.burp-g-logo .g { color: #34a853; } .burp-g-logo .r2 { color: #ea4335; }
+
+.burp-g-search-form-v2 { width: 100%; max-width: 584px; }
+.burp-g-search-form-v2.inline { flex: 1; max-width: 692px; }
+.burp-g-search-box-v2 {
+  display: flex; align-items: center; gap: 0.35rem;
+  padding: 0.55rem 0.85rem; border-radius: 999px;
+  border: 1px solid #dfe1e5; background: #fff;
+  box-shadow: 0 2px 8px 1px rgba(64, 60, 67, 0.08);
+  transition: box-shadow 0.2s;
+  margin-bottom: 0.85rem;
+}
+.burp-g-search-box-v2:hover,
+.burp-g-search-box-v2:focus-within {
+  box-shadow: 0 2px 12px 2px rgba(64, 60, 67, 0.12);
+  border-color: transparent;
+}
+.burp-g-search-box-v2.small { padding: 0.35rem 0.75rem; margin-bottom: 0; max-height: 44px; }
+.burp-g-search-plus {
+  width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
+  color: #5f6368; font-size: 1.25rem; cursor: pointer; flex-shrink: 0; line-height: 1;
+}
+.burp-g-search-box-v2 input {
+  flex: 1; border: none; outline: none; font-size: 1rem; background: transparent;
+  color: #202124; font-family: arial, sans-serif; min-width: 0;
+}
+.burp-g-search-box-v2.small input { font-size: 0.9375rem; }
+.burp-g-search-tools { display: flex; align-items: center; gap: 0.15rem; flex-shrink: 0; }
+.burp-g-tool-btn {
+  background: none; border: none; cursor: pointer; padding: 0.25rem;
+  display: flex; align-items: center; border-radius: 50%;
+}
+.burp-g-tool-btn:hover { background: rgba(60, 64, 67, 0.08); }
+.burp-g-ai-mode {
+  display: flex; align-items: center; gap: 0.25rem;
+  padding: 0.35rem 0.75rem; border-radius: 999px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #e8f0fe, #f3e8fd);
+  color: #1a73e8; font-size: 0.8125rem; font-weight: 500; font-family: arial, sans-serif;
+  margin-left: 0.15rem; white-space: nowrap;
+}
+.burp-g-ai-mode:hover { background: linear-gradient(135deg, #d2e3fc, #e9d5fd); }
+.burp-g-ai-sparkle { font-size: 0.875rem; color: #4285f4; }
+
+.burp-g-ai-chips {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.burp-g-chip {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.55rem 1rem; border-radius: 999px; border: none; cursor: pointer;
+  background: #f0f4f9; color: #202124; font-size: 0.8125rem; font-family: arial, sans-serif;
+  transition: background 0.15s;
+}
+.burp-g-chip:hover { background: #e2e8f0; }
+.burp-g-chip-icon { font-size: 0.9375rem; }
+
+.burp-g-langs {
+  font-size: 0.8125rem; color: #3c4043; text-align: center; line-height: 1.8;
+}
+.burp-g-langs button {
+  background: none; border: none; color: #1a0dab; cursor: pointer;
+  font-size: 0.8125rem; padding: 0 0.2rem; font-family: arial, sans-serif;
+}
+.burp-g-langs button:hover { text-decoration: underline; }
+
+.burp-g-site-footer {
+  margin-top: auto; background: #f2f2f2; color: #70757a; font-size: 0.875rem;
+}
+.burp-g-footer-row {
+  padding: 0.85rem 1.75rem; border-top: 1px solid #dadce0;
+}
+.burp-g-footer-loc { font-size: 0.9375rem; color: #70757a; }
+.burp-g-footer-links {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem;
+}
+.burp-g-footer-left, .burp-g-footer-right { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.burp-g-footer-links button {
+  background: none; border: none; color: #70757a; cursor: pointer;
+  font-size: 0.875rem; padding: 0; font-family: arial, sans-serif;
+}
+.burp-g-footer-links button:hover { text-decoration: underline; }
+
+/* ── Google Results v2 ── */
+.burp-google-results-v2 { min-height: 520px; display: flex; flex-direction: column; }
+.burp-g-results-header {
+  display: flex; align-items: center; gap: 1rem; padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid #ebebeb;
+}
+.burp-g-results-header-right {
+  margin-left: auto; display: flex; align-items: center; gap: 0.5rem;
+}
+.burp-g-result-tabs {
+  display: flex; gap: 0.25rem; padding: 0 2rem; border-bottom: 1px solid #ebebeb;
+  overflow-x: auto;
+}
+.burp-g-result-tabs button {
+  background: none; border: none; padding: 0.65rem 0.85rem; font-size: 0.875rem;
+  color: #5f6368; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap;
+  font-family: arial, sans-serif;
+}
+.burp-g-result-tabs button.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
+.burp-g-result-tabs button:hover { color: #202124; }
+.burp-g-results-body { padding: 0.75rem 2rem 1.5rem; text-align: left; }
+.burp-g-result-meta { font-size: 0.875rem; color: #70757a; margin-bottom: 1rem; }
+.burp-g-results-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.burp-g-result-item {
+  display: flex; gap: 0.75rem; text-align: left; background: none; border: none;
+  cursor: pointer; padding: 0.25rem; border-radius: 8px; width: 100%;
+}
+.burp-g-result-item:hover { background: #f8f9fa; }
+.burp-g-result-favicon {
+  width: 28px; height: 28px; border-radius: 50%; background: #f1f3f4;
+  display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0;
+}
+.burp-g-result-item cite {
+  display: block; font-size: 0.875rem; color: #202124; font-style: normal; margin-bottom: 0.1rem;
+}
+.burp-g-result-item strong {
+  display: block; font-size: 1.25rem; color: #1a0dab; font-weight: 400; margin-bottom: 0.25rem;
+  line-height: 1.3; text-align: left;
+}
+.burp-g-result-item:hover strong { text-decoration: underline; }
+.burp-g-result-item p { font-size: 0.875rem; color: #4d5156; line-height: 1.58; margin: 0; text-align: left; }
+.burp-g-back {
+  margin-top: 1.5rem; padding: 0.45rem 0.85rem; border-radius: 6px;
+  border: 1px solid #dadce0; background: #f8f9fa; font-size: 0.8125rem; cursor: pointer;
+  font-family: arial, sans-serif;
+}
+
+/* legacy aliases kept minimal */
+.burp-google-home { display: none; }
+.burp-google-results { display: none; }
+
+.burp-proxy-panel {
+  border-radius: 12px; overflow: hidden; border: 1px solid #9a3412;
+  background: #1c1917; color: #e7e5e4; min-height: 420px; display: flex; flex-direction: column;
+}
+.burp-proxy-head {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.35rem;
+  padding: 0.55rem 0.75rem; background: linear-gradient(90deg, #7c2d12, #9a3412);
+  font-size: 0.75rem; font-weight: 800; letter-spacing: 0.03em;
+}
+.burp-proxy-count { font-weight: 600; opacity: 0.85; font-size: 0.6875rem; }
+.burp-proxy-split {
+  display: grid; grid-template-columns: 1fr 1fr; flex: 1; min-height: 360px;
+}
+.burp-history-list {
+  border-right: 1px solid #44403c; overflow-y: auto; max-height: 480px;
+}
+.burp-history-item {
+  display: grid; grid-template-columns: auto auto 1fr auto; gap: 0.35rem; align-items: center;
+  width: 100%; text-align: left; padding: 0.45rem 0.55rem; border: none; border-bottom: 1px solid #292524;
+  background: transparent; color: #d6d3d1; font-size: 0.5625rem; font-family: var(--mono); cursor: pointer;
+}
+.burp-history-item:hover { background: #292524; }
+.burp-history-item.active { background: #431407; border-left: 3px solid #f97316; }
+.burp-h-time { color: #78716c; }
+.burp-h-method { color: #4ade80; font-weight: 700; }
+.burp-h-path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fcd34d; }
+.burp-h-user { color: #93c5fd; font-size: 0.5rem; }
+.burp-request-view { padding: 0.65rem; overflow-y: auto; max-height: 480px; }
+.burp-req-meta { font-size: 0.6875rem; margin-bottom: 0.5rem; color: #a8a29e; }
+.burp-raw-http {
+  font-family: var(--mono); font-size: 0.5625rem; line-height: 1.55; color: #4ade80;
+  background: #0c0a09; padding: 0.65rem; border-radius: 6px; overflow-x: auto;
+  white-space: pre-wrap; word-break: break-all; margin: 0 0 0.5rem;
+}
+.burp-highlight {
+  font-size: 0.6875rem; padding: 0.45rem 0.55rem; border-radius: 6px;
+  background: rgba(234, 88, 12, 0.15); border: 1px solid #ea580c; color: #fed7aa; margin-top: 0.35rem;
+}
+.burp-highlight.dim { background: rgba(255,255,255,0.05); border-color: #57534e; color: #a8a29e; }
+.burp-highlight code { color: #fdba74; font-weight: 700; }
+.burp-empty { font-size: 0.75rem; color: #78716c; padding: 1rem; text-align: center; }
+
+.burp-action-tag {
+  display: inline-block; font-size: 0.5625rem; font-weight: 800; padding: 0.1rem 0.35rem;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.burp-action-tag.search { background: #1e3a8a; color: #93c5fd; }
+.burp-action-tag.click { background: #14532d; color: #86efac; }
+.burp-action-tag.lab_open { background: #581c87; color: #e9d5ff; }
+
+.admin-burp-panel { margin-top: 1rem; }
+.admin-burp-stats { margin: 0.75rem 0; }
+.admin-burp-top-queries { margin: 0.75rem 0; font-size: 0.8125rem; }
+.admin-burp-query-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.35rem; }
+.admin-burp-chip {
+  padding: 0.25rem 0.55rem; border-radius: 999px; font-size: 0.6875rem;
+  background: #fff7ed; border: 1px solid #fdba74; color: #9a3412;
+}
+.admin-burp-chip small { opacity: 0.7; }
+.admin-burp-log-table { max-height: 320px; margin-top: 0.75rem; }
+
+@media (max-width: 960px) {
+  .burp-lab-stage { grid-template-columns: 1fr; }
+  .burp-proxy-split { grid-template-columns: 1fr; }
+  .burp-history-list { max-height: 200px; border-right: none; border-bottom: 1px solid #44403c; }
+  .burp-g-logo { font-size: 4rem; }
+  .burp-google-page { min-height: 480px; }
+  .burp-g-footer-links { flex-direction: column; }
+  .burp-g-results-body { padding: 0.75rem 1rem 1.5rem; }
+  .burp-g-result-tabs { padding: 0 1rem; }
+}
+
+@media (max-width: 768px) {
+  .burp-g-topbar { padding: 0.65rem 0.75rem; font-size: 0.75rem; }
+  .burp-g-topbar-left button:nth-child(1) { display: none; }
+  .burp-g-main { padding: 1.5rem 0.75rem 1rem; }
+  .burp-g-logo { font-size: 3.25rem; margin-bottom: 1.25rem; }
+  .burp-g-search-box-v2 { padding: 0.45rem 0.65rem; }
+  .burp-g-ai-mode span:last-child { display: none; }
+  .burp-g-ai-mode { padding: 0.35rem 0.5rem; }
+  .burp-g-ai-chips { gap: 0.35rem; }
+  .burp-g-chip { padding: 0.45rem 0.75rem; font-size: 0.75rem; }
+  .burp-g-langs { font-size: 0.75rem; }
+  .burp-g-footer-row { padding: 0.65rem 1rem; }
+  .burp-g-results-header { flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem 0.75rem; }
+  .burp-g-result-item strong { font-size: 1.0625rem; }
+}
+

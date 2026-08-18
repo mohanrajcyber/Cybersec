@@ -18,6 +18,7 @@ export const SIDEBAR_NAV = [
       { path: '/owasp', label: 'OWASP Web Security', icon: '🛡️' },
       { path: '/password', label: 'Password Security', icon: '🔐' },
       { path: '/network', label: 'Network Analysis', icon: '🌐' },
+      { path: '/burp-suite', label: 'Burp Suite', icon: '🔶' },
       { path: '/soc', label: 'SOC Log Analysis', icon: '📊' },
       { path: '/ir', label: 'Incident Response', icon: '🚨' },
       { path: '/ctf', label: 'Mini CTF', icon: '🏁' },

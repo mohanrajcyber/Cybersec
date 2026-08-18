@@ -5,6 +5,7 @@ import { BADGES } from '../data/badges'
 import { getAllStudentAccounts, saveStudentAccount, bulkSaveStudentAccounts } from '../utils/studentAuth'
 import { getPasswordStrength } from '../utils/passwordStrength'
 import { getLabCompletionStats, exportProgressJson } from '../utils/classProgress'
+import { getBurpStats, clearBurpLogs } from '../utils/burpSuiteLog'
 import { generateReportCard } from '../utils/reportCard'
 import { buildStudentLoginUrl, generateQrDataUrl } from '../utils/qrLogin'
 import { ICT_SESSION } from '../data/sessionPlan'
@@ -100,6 +101,7 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [refresh, setRefresh] = useState(0)
   const [labStats, setLabStats] = useState(() => getLabCompletionStats())
+  const [burpStats, setBurpStats] = useState(() => getBurpStats())
   const [qrStudent, setQrStudent] = useState(null)
 
   const students = useMemo(() => getAllStudents(), [refresh])
@@ -108,10 +110,14 @@ export default function AdminDashboard() {
   const refreshAll = useCallback(() => {
     setRefresh((n) => n + 1)
     setLabStats(getLabCompletionStats())
+    setBurpStats(getBurpStats())
   }, [])
 
   useEffect(() => {
-    const id = setInterval(() => setLabStats(getLabCompletionStats()), 4000)
+    const id = setInterval(() => {
+      setLabStats(getLabCompletionStats())
+      setBurpStats(getBurpStats())
+    }, 4000)
     return () => clearInterval(id)
   }, [])
 
@@ -278,6 +284,61 @@ export default function AdminDashboard() {
               <span className="field-hint">{lab.pct}% complete</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="panel admin-burp-panel">
+        <div className="panel-header-row">
+          <div className="panel-title">🔶 Burp Suite — Student Activity Log</div>
+          <div className="admin-live-actions">
+            <button type="button" className="btn btn-outline btn-sm" onClick={refreshAll}>↻ Refresh</button>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => { clearBurpLogs(); refreshAll() }}>Clear logs</button>
+          </div>
+        </div>
+        <p className="field-hint">Live intercept log — who opened Burp lab, what they searched, what they clicked (same browser storage)</p>
+        <div className="stats-row admin-burp-stats">
+          <div className="stat-card"><span className="stat-icon">👥</span><div><div className="stat-value">{burpStats.uniqueStudents}</div><div className="stat-label">Students (events)</div></div></div>
+          <div className="stat-card"><span className="stat-icon">🌐</span><div><div className="stat-value">{burpStats.uniqueOpeners}</div><div className="stat-label">Opened Lab</div></div></div>
+          <div className="stat-card"><span className="stat-icon">🔍</span><div><div className="stat-value">{burpStats.searchCount}</div><div className="stat-label">Searches</div></div></div>
+          <div className="stat-card"><span className="stat-icon">📡</span><div><div className="stat-value">{burpStats.totalEvents}</div><div className="stat-label">Total Requests</div></div></div>
+        </div>
+        {burpStats.topQueries.length > 0 && (
+          <div className="admin-burp-top-queries">
+            <strong>Top search queries:</strong>
+            <div className="admin-burp-query-chips">
+              {burpStats.topQueries.map((q) => (
+                <span key={q.query} className="admin-burp-chip">{q.query} <small>({q.count})</small></span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="table-wrap admin-table-scroll admin-burp-log-table">
+          <table className="scan-table admin-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Student</th>
+                <th>Action</th>
+                <th>Query / Target</th>
+                <th>URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {burpStats.recentLogs.length === 0 ? (
+                <tr><td colSpan={5} className="field-hint">No Burp lab activity yet — ask students to open Burp Suite from sidebar</td></tr>
+              ) : (
+                burpStats.recentLogs.map((l) => (
+                  <tr key={l.id}>
+                    <td><code>{l.time}</code></td>
+                    <td>{l.studentName} <code>@{l.studentUsername}</code></td>
+                    <td><span className={`burp-action-tag ${l.action}`}>{l.action}</span></td>
+                    <td>{l.query || l.target || '—'}</td>
+                    <td><code>{l.url}</code></td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
