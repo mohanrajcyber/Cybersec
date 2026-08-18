@@ -4484,7 +4484,56 @@ body.war-room-open { overflow: hidden; background: #050810; }
 .burp-g-result-tabs button.active { color: #1a73e8; border-bottom-color: #1a73e8; font-weight: 500; }
 .burp-g-result-tabs button:hover { color: #202124; }
 .burp-g-results-body { padding: 0.75rem 2rem 1.5rem; text-align: left; }
+.burp-g-results-layout {
+  display: grid; grid-template-columns: 1fr 280px; gap: 1.25rem;
+  padding: 0.75rem 1.5rem 1.5rem; text-align: left;
+}
+.burp-g-results-main { min-width: 0; }
 .burp-g-result-meta { font-size: 0.875rem; color: #70757a; margin-bottom: 1rem; }
+.burp-g-hl { background: transparent; color: #202124; font-weight: 600; padding: 0; }
+.burp-g-result-date {
+  display: block; font-size: 0.75rem; color: #70757a; font-weight: 400; margin-top: 0.1rem;
+}
+
+.burp-g-paa {
+  margin-bottom: 1.25rem; padding: 0.75rem 0; border-top: 1px solid #ebebeb; border-bottom: 1px solid #ebebeb;
+}
+.burp-g-paa h3 { font-size: 1.125rem; font-weight: 400; color: #202124; margin: 0 0 0.5rem; }
+.burp-g-paa-item {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  padding: 0.75rem 0; border: none; border-top: 1px solid #ebebeb; background: transparent;
+  text-align: left; font-size: 0.9375rem; color: #202124; cursor: pointer;
+}
+.burp-g-paa-item:first-of-type { border-top: none; }
+.burp-g-paa-item:hover span:first-child { text-decoration: underline; }
+.burp-g-paa-chevron { color: #70757a; font-size: 0.75rem; }
+
+.burp-g-related { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ebebeb; }
+.burp-g-related h3 { font-size: 1rem; font-weight: 400; color: #70757a; margin: 0 0 0.75rem; }
+.burp-g-related-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.burp-g-related-chip {
+  padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid #dadce0;
+  background: #f8f9fa; color: #3c4043; font-size: 0.8125rem; cursor: pointer;
+}
+.burp-g-related-chip:hover { background: #e8eaed; border-color: #bdc1c6; }
+
+.burp-g-knowledge {
+  background: #fff; border: 1px solid #ebebeb; border-radius: 8px;
+  padding: 1rem; align-self: start; box-shadow: 0 1px 6px rgba(32, 33, 36, 0.08);
+}
+.burp-g-knowledge-head { display: flex; gap: 0.65rem; margin-bottom: 0.75rem; }
+.burp-g-knowledge-emoji { font-size: 2rem; line-height: 1; }
+.burp-g-knowledge-head h2 { font-size: 1.375rem; font-weight: 400; margin: 0; color: #202124; }
+.burp-g-knowledge-head p { font-size: 0.8125rem; color: #70757a; margin: 0.15rem 0 0; }
+.burp-g-knowledge-facts {
+  margin: 0; padding-left: 1.1rem; font-size: 0.8125rem; color: #4d5156; line-height: 1.55;
+}
+.burp-g-knowledge-facts li { margin-bottom: 0.35rem; }
+.burp-g-knowledge-src { font-size: 0.6875rem; color: #9aa0a6; margin: 0.75rem 0 0; }
+
+.burp-site-section { margin-top: 1.25rem; }
+.burp-site-section h2 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.35rem; color: #202124; }
+.burp-site-section p { font-size: 0.9375rem; line-height: 1.6; color: #4d5156; margin: 0; }
 .burp-g-results-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .burp-g-result-item {
   display: flex; gap: 0.75rem; text-align: left; background: none; border: none;
@@ -4582,6 +4631,8 @@ body.war-room-open { overflow: hidden; background: #050810; }
   .burp-g-logo { font-size: 4rem; }
   .burp-google-page { min-height: 480px; }
   .burp-g-footer-links { flex-direction: column; }
+  .burp-g-results-layout { grid-template-columns: 1fr; padding: 0.75rem 1rem 1.5rem; }
+  .burp-g-knowledge { order: -1; margin-bottom: 0.5rem; }
   .burp-g-results-body { padding: 0.75rem 1rem 1.5rem; }
   .burp-g-result-tabs { padding: 0 1rem; }
 }

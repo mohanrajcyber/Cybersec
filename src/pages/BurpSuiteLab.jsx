@@ -2,44 +2,10 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import PageShell from '../components/PageShell'
 import { logBurpEvent, getBurpLogs, buildHttpRaw } from '../utils/burpSuiteLog'
+import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGoogleSearch'
 
 const HOME_URL = 'https://www.google.com/'
 const LOAD_MS = 520
-
-const BASE_RESULTS = [
-  { title: 'ICT Academy — Cyber Security Training', url: 'https://www.ictacademy.in', snippet: 'Official ICT Academy portal for cybersecurity and emerging technology programs across Tamil Nadu.' },
-  { title: 'Auxilium College Pudukkottai', url: 'https://www.auxiliumcollege.ac.in', snippet: 'NAAC A Grade women\'s college — Bharathidasan University affiliated institution.' },
-  { title: 'OWASP Top 10 Web Security Risks', url: 'https://owasp.org/www-project-top-ten/', snippet: 'Learn about injection, broken authentication, XSS and other critical web vulnerabilities.' },
-  { title: 'Burp Suite — Web Security Testing', url: 'https://portswigger.net/burp', snippet: 'Industry-standard toolkit for intercepting HTTP traffic between browser and web server.' },
-]
-
-const SITE_PAGES = {
-  'www.ictacademy.in': {
-    title: 'ICT Academy',
-    heading: 'Empowering Youth for Future Tech Careers',
-    body: 'ICT Academy is a not-for-profit initiative focusing on cybersecurity, AI, and emerging technologies for students across India.',
-  },
-  'www.auxiliumcollege.ac.in': {
-    title: 'Auxilium College',
-    heading: 'Auxilium College — Pudukkottai',
-    body: 'Welcome to Auxilium College. NAAC accredited institution affiliated to Bharathidasan University.',
-  },
-  'owasp.org': {
-    title: 'OWASP Foundation',
-    heading: 'OWASP Top 10 Web Application Security Risks',
-    body: 'The OWASP Top 10 is a standard awareness document for developers and web application security.',
-  },
-  'portswigger.net': {
-    title: 'PortSwigger — Burp Suite',
-    heading: 'Burp Suite Professional',
-    body: 'Burp Suite is the leading toolkit for web security testing. Proxy, Scanner, Intruder, and Repeater modules.',
-  },
-  'mail.google.com': {
-    title: 'Gmail',
-    heading: 'Sign in — Google Accounts',
-    body: 'Email or phone · Forgot email? · Create account · ICT Academy simulation — no real login.',
-  },
-}
 
 const LANG_LINKS = ['हिन्दी', 'বাংলা', 'తెలుగు', 'मराठी', 'தமிழ்', 'ગુજરાતી', 'ಕನ್ನಡ', 'മലയാളം', 'ਪੰਜਾਬੀ']
 const AI_CHIPS = [
@@ -64,7 +30,7 @@ function searchPage(query) {
   }
 }
 
-function sitePage(title, url) {
+function sitePage(title, url, sourceQuery = '') {
   let host = 'www.example.com'
   try {
     host = new URL(url).host
@@ -76,7 +42,8 @@ function sitePage(title, url) {
     siteTitle: title,
     siteHost: host,
     host,
-    query: '',
+    sourceQuery,
+    query: sourceQuery,
   }
 }
 
@@ -116,27 +83,18 @@ function parseAddressInput(raw) {
   return searchPage(input)
 }
 
-function getSearchResults(query) {
-  const q = query.trim().toLowerCase()
-  const scored = BASE_RESULTS.map((r) => {
-    const hay = `${r.title} ${r.snippet} ${r.url}`.toLowerCase()
-    let score = 0
-    q.split(/\s+/).forEach((word) => {
-      if (word && hay.includes(word)) score += 2
-    })
-    return { ...r, score }
-  }).sort((a, b) => b.score - a.score)
-
-  const top = scored.filter((r) => r.score > 0)
-  const list = top.length ? top : BASE_RESULTS
-  return [
-    {
-      title: `"${query}" — Top web results (simulated)`,
-      url: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
-      snippet: `Google found pages related to "${query}". ICT Academy lab simulation only.`,
-    },
-    ...list.slice(0, 5),
-  ]
+function SnippetText({ text }) {
+  const parts = String(text).split(/(⟨[^⟩]+⟩)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('⟨') && part.endsWith('⟩')) {
+          return <mark key={i} className="burp-g-hl">{part.slice(1, -1)}</mark>
+        }
+        return part
+      })}
+    </>
+  )
 }
 
 function GoogleLogo({ size = 'large' }) {
@@ -290,8 +248,9 @@ function GoogleHome({ searchInput, setSearchInput, onSearch, onNavClick, onChipC
   )
 }
 
-function GoogleResults({ query, searchInput, setSearchInput, resultsMeta, onSearch, onNavClick, onResultClick, profileInitial }) {
-  const results = useMemo(() => getSearchResults(query), [query])
+function GoogleResults({ query, searchInput, setSearchInput, onSearch, onNavClick, onResultClick, onRelatedSearch, profileInitial }) {
+  const searchData = useMemo(() => buildGoogleSearchResponse(query), [query])
+  const { resultCount, seconds, knowledgePanel, results, peopleAlsoAsk, relatedSearches } = searchData
 
   return (
     <div className="burp-google-results-v2">
@@ -313,43 +272,92 @@ function GoogleResults({ query, searchInput, setSearchInput, resultsMeta, onSear
           <button key={t} type="button" className={i === 0 ? 'active' : ''} onClick={() => onNavClick(t)}>{t}</button>
         ))}
       </nav>
-      <div className="burp-g-results-body">
-        <p className="burp-g-result-meta">About {resultsMeta.count} results ({resultsMeta.seconds} seconds)</p>
-        <div className="burp-g-results-list">
-          {results.map((r) => (
-            <button key={`${r.url}-${r.title}`} type="button" className="burp-g-result-item" onClick={() => onResultClick(r.title, r.url)}>
-              <div className="burp-g-result-favicon">🌐</div>
-              <div>
-                <cite>{r.url.replace(/^https?:\/\//, '')}</cite>
-                <strong>{r.title}</strong>
-                <p>{r.snippet}</p>
+      <div className="burp-g-results-layout">
+        <div className="burp-g-results-main">
+          <p className="burp-g-result-meta">About {resultCount.toLocaleString('en-IN')} results ({seconds} seconds)</p>
+
+          {peopleAlsoAsk?.length > 0 && (
+            <div className="burp-g-paa">
+              <h3>People also ask</h3>
+              {peopleAlsoAsk.map((q) => (
+                <button key={q} type="button" className="burp-g-paa-item" onClick={() => onRelatedSearch(q)}>
+                  <span>{q}</span><span className="burp-g-paa-chevron">▾</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="burp-g-results-list">
+            {results.map((r) => (
+              <button key={`${r.url}-${r.title}`} type="button" className="burp-g-result-item" onClick={() => onResultClick(r.title, r.url)}>
+                <div className="burp-g-result-favicon">{r.favicon || '🌐'}</div>
+                <div>
+                  <cite>{r.url.replace(/^https?:\/\//, '')}</cite>
+                  <strong>{r.title}</strong>
+                  {r.date && <span className="burp-g-result-date">{r.date}</span>}
+                  <p><SnippetText text={r.snippet} /></p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {relatedSearches?.length > 0 && (
+            <div className="burp-g-related">
+              <h3>Searches related to {query}</h3>
+              <div className="burp-g-related-chips">
+                {relatedSearches.map((term) => (
+                  <button key={term} type="button" className="burp-g-related-chip" onClick={() => onRelatedSearch(term)}>
+                    {term}
+                  </button>
+                ))}
               </div>
-            </button>
-          ))}
+            </div>
+          )}
         </div>
+
+        {knowledgePanel && (
+          <aside className="burp-g-knowledge">
+            <div className="burp-g-knowledge-head">
+              <span className="burp-g-knowledge-emoji">{knowledgePanel.emoji}</span>
+              <div>
+                <h2>{knowledgePanel.title}</h2>
+                <p>{knowledgePanel.subtitle}</p>
+              </div>
+            </div>
+            <ul className="burp-g-knowledge-facts">
+              {knowledgePanel.facts.map((fact) => (
+                <li key={fact}>{fact}</li>
+              ))}
+            </ul>
+            <p className="burp-g-knowledge-src">Data from Google Knowledge Graph (simulated)</p>
+          </aside>
+        )}
       </div>
     </div>
   )
 }
 
 function MockSitePage({ page }) {
-  const host = page.siteHost || page.host
-  const preset = SITE_PAGES[host] || SITE_PAGES[host.replace(/^www\./, '')]
-  const heading = preset?.heading || page.siteTitle || host
-  const body = preset?.body || `Simulated page for ${page.url}. In a real browser this would load live content from the server.`
+  const content = buildSitePageContent(page)
 
   return (
     <div className="burp-site-page">
       <div className="burp-site-toolbar">
-        <span className="burp-site-favicon">🌐</span>
-        <span className="burp-site-host">{host}</span>
+        <span className="burp-site-favicon">{content.favicon}</span>
+        <span className="burp-site-host">{content.host}</span>
       </div>
       <article className="burp-site-content">
-        <h1>{heading}</h1>
-        <p>{body}</p>
+        <h1>{content.heading}</h1>
+        <p>{content.body}</p>
+        {content.sections?.map((sec) => (
+          <section key={sec.h} className="burp-site-section">
+            <h2>{sec.h}</h2>
+            <p>{sec.p}</p>
+          </section>
+        ))}
         <div className="burp-site-card">
           <p><strong>URL:</strong> <code>{page.url}</code></p>
-          <p className="burp-site-note">ICT Academy lab — simulated HTTP response. Burp Suite captured the GET request in the proxy panel.</p>
+          {page.sourceQuery && <p><strong>From search:</strong> <code>{page.sourceQuery}</code></p>}
         </div>
       </article>
     </div>
@@ -391,10 +399,6 @@ export default function BurpSuiteLab() {
   const loggedOpen = useRef(false)
   const loadTimer = useRef(null)
   const historyIndexRef = useRef(0)
-  const resultsMeta = useMemo(() => ({
-    count: Math.floor(Math.random() * 900 + 100),
-    seconds: `0.${Math.floor(Math.random() * 40 + 10)}`,
-  }), [historyIndex])
 
   const currentPage = history[historyIndex] || homePage()
   const canBack = historyIndex > 0
@@ -574,11 +578,20 @@ export default function BurpSuiteLab() {
   }
 
   const handleResultClick = (title, url) => {
+    if (url.includes('google.com/search') && url.includes('tbm=isch')) {
+      capture({ action: 'click', method: 'GET', url: '/search', query: currentPage.query || searchInput, target: 'Google Images', host: 'www.google.com', details: 'tbm=isch' })
+      return
+    }
     if (url.includes('google.com/search')) {
       handleSearch(null, false)
       return
     }
-    navigateTo(sitePage(title, url))
+    navigateTo(sitePage(title, url, currentPage.query || searchInput))
+  }
+
+  const handleRelatedSearch = (term) => {
+    setSearchInput(term)
+    navigateTo(searchPage(term))
   }
 
   const myLogs = logs.filter((l) => l.studentUsername === username)
@@ -604,10 +617,10 @@ export default function BurpSuiteLab() {
             query={currentPage.query}
             searchInput={searchInput}
             setSearchInput={setSearchInput}
-            resultsMeta={resultsMeta}
             onSearch={handleSearch}
             onNavClick={handleNavClick}
             onResultClick={handleResultClick}
+            onRelatedSearch={handleRelatedSearch}
             profileInitial={profileInitial}
           />
         )
