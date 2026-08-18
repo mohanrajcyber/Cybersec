@@ -1,4 +1,4 @@
-import { safeGetItem } from './storage'
+import { safeGetItem, safeSetItem } from './storage'
 
 const STUDENTS_KEY = 'cybersec-students'
 
@@ -44,4 +44,16 @@ export function exportProgressJson() {
   a.download = `cybersec-progress-${Date.now()}.json`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+export function deleteStudentProgress(username) {
+  const user = String(username || '').trim().toLowerCase()
+  if (!user) return { ok: false, error: 'Invalid username.' }
+
+  const students = loadAllStudentProgress()
+  if (!students[user]) return { ok: true, removed: false }
+
+  delete students[user]
+  safeSetItem(STUDENTS_KEY, JSON.stringify(students))
+  return { ok: true, removed: true }
 }

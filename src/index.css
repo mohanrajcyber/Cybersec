@@ -4258,6 +4258,15 @@ body.war-room-open { overflow: hidden; background: #050810; }
 [data-theme="dark"] .admin-cloud-setup { background: #422006; border-color: #ca8a04; color: #fde68a; }
 .admin-cloud-error { margin: 0.5rem 0; }
 
+.admin-delete-btn {
+  color: #dc2626 !important; border-color: #fca5a5 !important; font-weight: 600;
+}
+.admin-delete-btn:hover {
+  background: #fef2f2 !important; border-color: #f87171 !important;
+}
+[data-theme="dark"] .admin-delete-btn { color: #fca5a5 !important; border-color: #991b1b !important; }
+[data-theme="dark"] .admin-delete-btn:hover { background: #450a0a !important; }
+
 .burp-lab-stage {
   display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start;
 }

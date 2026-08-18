@@ -2,11 +2,11 @@ import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { modules } from '../data/modules'
 import { BADGES } from '../data/badges'
-import { getAllStudentAccounts, saveStudentAccount, bulkSaveStudentAccounts } from '../utils/studentAuth'
+import { getAllStudentAccounts, saveStudentAccount, bulkSaveStudentAccounts, deleteStudentAccount } from '../utils/studentAuth'
 import { getPasswordStrength } from '../utils/passwordStrength'
-import { getLabCompletionStats, exportProgressJson } from '../utils/classProgress'
-import { getBurpStats, clearBurpLogs } from '../utils/burpSuiteLog'
-import { getChallengeStats } from '../utils/burpChallengeProgress'
+import { getLabCompletionStats, exportProgressJson, deleteStudentProgress } from '../utils/classProgress'
+import { getBurpStats, clearBurpLogs, deleteBurpLogsForStudent } from '../utils/burpSuiteLog'
+import { getChallengeStats, deleteChallengeProgressForStudent } from '../utils/burpChallengeProgress'
 import {
   isCloudSyncEnabled,
   subscribeBurpLogs,
@@ -14,6 +14,7 @@ import {
   computeBurpStatsFromLogs,
   computeChallengeStatsFromStudents,
   clearCloudBurpLogs,
+  deleteStudentCloudData,
 } from '../utils/burpCloudSync'
 import { generateReportCard } from '../utils/reportCard'
 import { buildStudentLoginUrl, generateQrDataUrl } from '../utils/qrLogin'
@@ -218,6 +219,34 @@ export default function AdminDashboard() {
 
   const handleSearch = (value) => {
     setSearch(value)
+  }
+
+  const handleDeleteStudent = async (student) => {
+    const label = student.displayName || student.name || student.username
+    const confirmed = window.confirm(
+      `Remove @${student.username} (${label})?\n\nThis deletes login, progress, and Burp activity for this student.`,
+    )
+    if (!confirmed) return
+
+    setErr('')
+    setMsg('')
+
+    deleteStudentAccount(student.username)
+    deleteStudentProgress(student.username)
+    deleteBurpLogsForStudent(student.username)
+    deleteChallengeProgressForStudent(student.username)
+
+    if (cloudEnabled) {
+      const cloudRes = await deleteStudentCloudData(student.username)
+      if (!cloudRes.ok) {
+        setErr(`Student removed locally, but cloud cleanup failed: ${cloudRes.error}`)
+        refreshAll()
+        return
+      }
+    }
+
+    setMsg(`Removed @${student.username} — login, progress, and logs deleted.`)
+    refreshAll()
   }
 
   return (
@@ -474,6 +503,7 @@ export default function AdminDashboard() {
                     <th>Badges</th>
                     <th>Last Login</th>
                     <th>QR</th>
+                    <th>Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -494,6 +524,16 @@ export default function AdminDashboard() {
                       <td>{s.lastLogin ? new Date(s.lastLogin).toLocaleDateString('en-IN') : 'Not yet'}</td>
                       <td>
                         <button type="button" className="btn btn-outline btn-sm" onClick={() => setQrStudent(s)} title="Show QR login">QR</button>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm admin-delete-btn"
+                          onClick={() => handleDeleteStudent(s)}
+                          title={`Remove @${s.username}`}
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}

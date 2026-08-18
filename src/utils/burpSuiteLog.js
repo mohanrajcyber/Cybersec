@@ -142,6 +142,18 @@ export function clearBurpLogs() {
   window.dispatchEvent(new CustomEvent('burp-log-update'))
 }
 
+export function deleteBurpLogsForStudent(username) {
+  const user = String(username || '').trim().toLowerCase()
+  if (!user) return { ok: false, removed: 0 }
+
+  const logs = loadLogs()
+  const kept = logs.filter((l) => l.studentUsername !== user)
+  const removed = logs.length - kept.length
+  saveLogs(kept)
+  window.dispatchEvent(new CustomEvent('burp-log-update'))
+  return { ok: true, removed }
+}
+
 export function buildHttpRaw(entry) {
   const host = entry.host || 'www.google.com'
   const path = entry.query && host.includes('google')

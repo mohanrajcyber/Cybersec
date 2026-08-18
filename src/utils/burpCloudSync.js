@@ -176,3 +176,36 @@ export async function clearCloudBurpLogs() {
     return { ok: false, error: err.message }
   }
 }
+
+export async function deleteStudentCloudData(username) {
+  const user = String(username || '').trim().toLowerCase()
+  const db = getFirestoreDb()
+  if (!db || !user) return { ok: true, deletedLogs: 0 }
+
+  try {
+    let batch = writeBatch(db)
+    let ops = 0
+    let deletedLogs = 0
+
+    batch.delete(doc(db, CHALLENGE_COL, user))
+    ops += 1
+
+    const snap = await getDocs(collection(db, LOGS_COL))
+    for (const docSnap of snap.docs) {
+      if (docSnap.data().studentUsername !== user) continue
+      batch.delete(docSnap.ref)
+      ops += 1
+      deletedLogs += 1
+      if (ops >= 400) {
+        await batch.commit()
+        batch = writeBatch(db)
+        ops = 0
+      }
+    }
+
+    if (ops > 0) await batch.commit()
+    return { ok: true, deletedLogs }
+  } catch (err) {
+    return { ok: false, error: err.message }
+  }
+}

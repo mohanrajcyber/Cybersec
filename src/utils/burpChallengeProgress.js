@@ -92,3 +92,16 @@ export function getChallengeStats() {
     }),
   }
 }
+
+export function deleteChallengeProgressForStudent(username) {
+  const user = String(username || '').trim().toLowerCase()
+  if (!user) return { ok: false, removed: false }
+
+  const all = loadAll()
+  if (!all[user]) return { ok: true, removed: false }
+
+  delete all[user]
+  saveAll(all)
+  window.dispatchEvent(new CustomEvent('burp-challenge-update', { detail: { username: user } }))
+  return { ok: true, removed: true }
+}

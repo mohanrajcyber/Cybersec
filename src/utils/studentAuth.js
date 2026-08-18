@@ -153,3 +153,17 @@ export function validateStudentCredentials(username, password) {
 
   return { ok: true, studentId: user, displayName: auth[user].displayName || displayName, username: user }
 }
+
+/** Trainer removes student login */
+export function deleteStudentAccount(username) {
+  const user = normalizeUsername(username)
+  if (!user) return { ok: false, error: 'Invalid username.' }
+
+  const auth = loadStudentAuth()
+  if (!auth[user]) return { ok: false, error: 'Student login not found.' }
+
+  delete auth[user]
+  const saved = saveAuth(auth)
+  if (!saved.ok) return saved
+  return { ok: true, username: user }
+}
