@@ -6,6 +6,7 @@ import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGo
 
 const HOME_URL = 'https://www.google.com/'
 const LOAD_MS = 520
+const REAL_GOOGLE_HOME = `${import.meta.env.BASE_URL || '/'}google-real-home.html`
 
 const LANG_LINKS = ['हिन्दी', 'বাংলা', 'తెలుగు', 'मराठी', 'தமிழ்', 'ગુજરાતી', 'ಕನ್ನಡ', 'മലയാളം', 'ਪੰਜਾਬੀ']
 const AI_CHIPS = [
@@ -137,7 +138,7 @@ function LensIcon() {
 
 function BrowserChrome({
   urlInput, onUrlInputChange, onUrlSubmit, onBack, onForward, onRefresh,
-  canBack, canForward, loading, pageTitle,
+  canBack, canForward, loading, pageTitle, onViewSource, onOpenRealGoogle, useRealHtml,
 }) {
   return (
     <div className="burp-browser-chrome burp-browser-chrome-v2">
@@ -148,6 +149,7 @@ function BrowserChrome({
         <button type="button" className="burp-nav-btn" onClick={onBack} disabled={!canBack || loading} title="Back" aria-label="Back">←</button>
         <button type="button" className="burp-nav-btn" onClick={onForward} disabled={!canForward || loading} title="Forward" aria-label="Forward">→</button>
         <button type="button" className="burp-nav-btn" onClick={onRefresh} disabled={loading} title="Reload" aria-label="Reload">↻</button>
+        <button type="button" className="burp-nav-btn burp-nav-btn-text" onClick={onViewSource} title="View page source" aria-label="View source">&lt;/&gt;</button>
       </div>
       <form className="burp-url-bar burp-url-bar-editable" onSubmit={onUrlSubmit}>
         <span className="burp-lock" title="Secure">🔒</span>
@@ -162,7 +164,33 @@ function BrowserChrome({
         />
         {loading && <span className="burp-url-spinner" aria-hidden />}
       </form>
+      <div className="burp-chrome-actions">
+        {useRealHtml && (
+          <span className="burp-real-badge" title="Using captured google.com HTML">Real HTML</span>
+        )}
+        <button type="button" className="burp-open-real-btn" onClick={onOpenRealGoogle} title="Open on live Google.com">
+          Open Live ↗
+        </button>
+      </div>
       {pageTitle && <div className="burp-tab-title" title={pageTitle}>{pageTitle}</div>}
+    </div>
+  )
+}
+
+function ViewSourceModal({ source, onClose }) {
+  if (!source) return null
+  return (
+    <div className="burp-source-backdrop" onClick={onClose} role="presentation">
+      <div className="burp-source-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="View source">
+        <div className="burp-source-head">
+          <strong>view-source:{source.url}</strong>
+          <label className="burp-source-wrap-label">
+            <input type="checkbox" defaultChecked readOnly /> Line wrap
+          </label>
+          <button type="button" className="burp-source-close" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+        <pre className="burp-source-code">{source.text}</pre>
+      </div>
     </div>
   )
 }
@@ -396,9 +424,12 @@ export default function BurpSuiteLab() {
   const [logs, setLogs] = useState(() => getBurpLogs())
   const [selectedLog, setSelectedLog] = useState(null)
   const [proxyOn, setProxyOn] = useState(true)
+  const [useRealHtml, setUseRealHtml] = useState(true)
+  const [viewSource, setViewSource] = useState(null)
   const loggedOpen = useRef(false)
   const loadTimer = useRef(null)
   const historyIndexRef = useRef(0)
+  const googleIframeRef = useRef(null)
 
   const currentPage = history[historyIndex] || homePage()
   const canBack = historyIndex > 0
@@ -507,11 +538,44 @@ export default function BurpSuiteLab() {
       setHistoryIndex(replace ? idx : idx + 1)
       setUrlInput(page.url)
       if (page.query) setSearchInput(page.query)
+      setUseRealHtml(page.type === 'home')
       logForPage(page, logExtra)
       setLoading(false)
       if (page.type === 'search') completeLab('burp-suite')
     }, LOAD_MS)
   }, [logForPage, completeLab])
+
+  useEffect(() => {
+    const onMessage = (event) => {
+      const data = event.data
+      if (!data || data.source !== 'cybersec-google') return
+
+      if (data.type === 'page_load') {
+        capture({ action: 'click', method: 'GET', url: '/', target: 'Google Home (real HTML)', host: 'www.google.com', details: 'Loaded google-real-home.html snapshot' })
+        return
+      }
+
+      if (data.type === 'search' && data.query) {
+        setSearchInput(data.query)
+        setUseRealHtml(false)
+        navigateTo(searchPage(data.query))
+        return
+      }
+
+      if (data.type === 'click') {
+        capture({
+          action: 'click',
+          method: 'GET',
+          url: data.url || '/',
+          target: data.target || 'click',
+          host: 'www.google.com',
+          details: `Real HTML click: ${data.target || ''} → ${data.url || ''}`,
+        })
+      }
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [capture, navigateTo])
 
   const goBack = () => {
     if (!canBack || loading) return
@@ -527,6 +591,11 @@ export default function BurpSuiteLab() {
 
   const reloadPage = () => {
     if (loading) return
+    if (useRealHtml && currentPage.type === 'home' && googleIframeRef.current) {
+      googleIframeRef.current.src = `${REAL_GOOGLE_HOME.split('?')[0]}?t=${Date.now()}`
+      capture({ action: 'click', method: 'GET', url: '/', target: 'Reload', host: 'www.google.com', details: 'Reload google-real-home.html' })
+      return
+    }
     setLoading(true)
     loadTimer.current = setTimeout(() => {
       logForPage(currentPage, { action: 'click', details: `Reload — ${currentPage.url}` })
@@ -591,7 +660,27 @@ export default function BurpSuiteLab() {
 
   const handleRelatedSearch = (term) => {
     setSearchInput(term)
+    setUseRealHtml(false)
     navigateTo(searchPage(term))
+  }
+
+  const handleViewSource = async () => {
+    const displayUrl = currentPage.url || HOME_URL
+    try {
+      const res = await fetch(REAL_GOOGLE_HOME)
+      const text = await res.text()
+      setViewSource({ url: displayUrl, text })
+      capture({ action: 'click', method: 'GET', url: '/view-source', target: 'View Source', host: 'www.google.com', details: `view-source:${displayUrl}` })
+    } catch {
+      setViewSource({ url: displayUrl, text: '<!-- Unable to load google-real-home.html -->' })
+    }
+  }
+
+  const handleOpenRealGoogle = () => {
+    const q = (currentPage.query || searchInput).trim()
+    const liveUrl = q ? `https://www.google.com/search?q=${encodeURIComponent(q)}` : HOME_URL
+    window.open(liveUrl, '_blank', 'noopener,noreferrer')
+    capture({ action: 'click', method: 'GET', url: '/open-external', query: q, target: 'Open Live Google', host: 'www.google.com', details: `window.open → ${liveUrl}` })
   }
 
   const myLogs = logs.filter((l) => l.studentUsername === username)
@@ -601,6 +690,18 @@ export default function BurpSuiteLab() {
   }
 
   const renderPage = () => {
+    if (useRealHtml && currentPage.type === 'home' && !loading) {
+      return (
+        <iframe
+          ref={googleIframeRef}
+          className="burp-real-google-frame"
+          src={REAL_GOOGLE_HOME}
+          title="Google — real homepage HTML"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        />
+      )
+    }
+
     if (loading) {
       return (
         <div className="burp-browser-loading">
@@ -667,6 +768,25 @@ export default function BurpSuiteLab() {
           <span>Your session: <strong>{sessionStats.requests}</strong> requests</span>
           <span>Searches: <strong>{sessionStats.searches}</strong></span>
         </div>
+        <div className="burp-mode-toggle">
+          <button
+            type="button"
+            className={`btn btn-sm ${useRealHtml ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => {
+              setUseRealHtml(true)
+              if (currentPage.type !== 'home') navigateTo(homePage())
+            }}
+          >
+            Real Google HTML
+          </button>
+          <button
+            type="button"
+            className={`btn btn-sm ${!useRealHtml ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => setUseRealHtml(false)}
+          >
+            Lab Simulation
+          </button>
+        </div>
       </div>
 
       <div className="burp-lab-stage">
@@ -682,14 +802,19 @@ export default function BurpSuiteLab() {
             canForward={canForward}
             loading={loading}
             pageTitle={currentPage.title}
+            onViewSource={handleViewSource}
+            onOpenRealGoogle={handleOpenRealGoogle}
+            useRealHtml={useRealHtml && currentPage.type === 'home'}
           />
 
-          <div className="burp-browser-viewport">
-            <div className="burp-google-page">
+          <div className={`burp-browser-viewport ${useRealHtml && currentPage.type === 'home' ? 'burp-browser-viewport--real' : ''}`}>
+            <div className={useRealHtml && currentPage.type === 'home' ? 'burp-real-google-wrap' : 'burp-google-page'}>
               {renderPage()}
             </div>
           </div>
         </div>
+
+        <ViewSourceModal source={viewSource} onClose={() => setViewSource(null)} />
 
         <div className="burp-proxy-panel">
           <div className="burp-proxy-head">

@@ -4262,6 +4262,44 @@ body.war-room-open { overflow: hidden; background: #050810; }
 }
 .burp-nav-btn:hover:not(:disabled) { background: rgba(60, 64, 67, 0.1); color: #202124; }
 .burp-nav-btn:disabled { opacity: 0.35; cursor: default; }
+.burp-nav-btn-text { font-size: 0.6875rem; font-weight: 700; font-family: var(--mono); width: auto; padding: 0 0.35rem; border-radius: 6px; }
+.burp-chrome-actions { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+.burp-real-badge {
+  font-size: 0.5625rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 0.2rem 0.45rem; border-radius: 4px; background: #dcfce7; color: #166534; border: 1px solid #86efac;
+}
+.burp-open-real-btn {
+  border: 1px solid #dadce0; background: #fff; color: #1a73e8; font-size: 0.625rem; font-weight: 600;
+  padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; white-space: nowrap;
+}
+.burp-open-real-btn:hover { background: #f1f3f4; }
+.burp-mode-toggle { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+.burp-browser-viewport--real { padding: 0; background: #fff; }
+.burp-real-google-wrap { min-height: 560px; height: 560px; background: #fff; }
+.burp-real-google-frame {
+  width: 100%; height: 100%; min-height: 560px; border: none; display: block; background: #fff;
+}
+
+.burp-source-backdrop {
+  position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.72);
+  display: flex; align-items: stretch; justify-content: center; padding: 1rem;
+}
+.burp-source-modal {
+  width: min(1200px, 100%); background: #0f172a; border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+}
+.burp-source-head {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem;
+  background: #1e293b; color: #e2e8f0; font-size: 0.75rem; font-family: var(--mono);
+}
+.burp-source-wrap-label { margin-left: auto; font-size: 0.6875rem; opacity: 0.85; display: flex; align-items: center; gap: 0.35rem; }
+.burp-source-close { border: none; background: transparent; color: #94a3b8; cursor: pointer; font-size: 1rem; padding: 0.15rem 0.35rem; }
+.burp-source-code {
+  flex: 1; margin: 0; padding: 0.75rem; overflow: auto; max-height: calc(100vh - 6rem);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.6875rem; line-height: 1.45; color: #cbd5e1; white-space: pre-wrap; word-break: break-all;
+}
 .burp-url-bar {
   flex: 1; display: flex; align-items: center; gap: 0.35rem;
   padding: 0.35rem 0.65rem; border-radius: 999px; background: #fff;

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "prepare:google": "curl -sL https://www.google.com/ -o public/google-real-home.raw.html && node scripts/process-google-html.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },
