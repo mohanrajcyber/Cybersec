@@ -12,13 +12,13 @@ export const SIDEBAR_NAV = [
   {
     section: 'Hands-On Labs',
     items: [
+      { path: '/burp-suite', label: 'Burp Suite', icon: '🔶' },
       { path: '/phishing', label: 'Phishing Detector', icon: '🎣' },
       { path: '/recon', label: 'Recon / Nmap', icon: '🕵️' },
       { path: '/lab/url-scanner', label: 'URL Scanner', icon: '🔗' },
       { path: '/owasp', label: 'OWASP Web Security', icon: '🛡️' },
       { path: '/password', label: 'Password Security', icon: '🔐' },
       { path: '/network', label: 'Network Analysis', icon: '🌐' },
-      { path: '/burp-suite', label: 'Burp Suite', icon: '🔶' },
       { path: '/soc', label: 'SOC Log Analysis', icon: '📊' },
       { path: '/ir', label: 'Incident Response', icon: '🚨' },
       { path: '/ctf', label: 'Mini CTF', icon: '🏁' },

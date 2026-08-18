@@ -50,6 +50,13 @@ const CORE_MODULES = [
     keywords: 'owasp sql injection xss web security',
   },
   {
+    id: 'burp-suite', order: 5.5, icon: '🔶', name: 'Burp Suite Lab',
+    desc: 'Intercept HTTP traffic on a realistic Google page — proxy lab simulation.',
+    learn: 'Capture requests like Burp Proxy', path: '/burp-suite', accent: '#ea580c',
+    badge: 'Web Proxy', category: 'web-app', difficulty: 'Medium', duration: '12 min',
+    keywords: 'burp suite proxy intercept http web security', startHere: true,
+  },
+  {
     id: 'soc', order: 6, icon: '📊', name: 'SOC / Log Analysis',
     desc: 'Parse security logs and detect anomalies in real-time.',
     learn: 'Analyze logs like a SOC analyst', path: '/soc', accent: '#2563eb',

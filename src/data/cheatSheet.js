@@ -91,7 +91,7 @@ export const THREAT_FEED = [
 export const QUICK_TOOLS = [
   { name: 'Nmap', use: 'Port & service discovery', link: '/recon' },
   { name: 'Wireshark', use: 'Packet capture analysis', link: '/network' },
-  { name: 'Burp Suite', use: 'Web app proxy testing', link: '/owasp' },
+  { name: 'Burp Suite', use: 'Web app proxy testing', link: '/burp-suite' },
   { name: 'Hashcat', use: 'Password hash cracking (lab)', link: '/lab/hash' },
   { name: 'Metasploit', use: 'Exploit framework (authorized only)', link: '/lab/enumeration' },
   { name: 'Volatility', use: 'Memory forensics', link: '/lab/forensics' },
