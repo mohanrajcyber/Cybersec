@@ -8,7 +8,7 @@ import {
   enrichLogEntry,
 } from '../utils/burpSuiteLog'
 
-const PANEL_TABS = ['Intercept', 'HTTP history', 'Options']
+const PANEL_TABS = ['HTTP history', 'Options']
 const DETAIL_TABS = ['Request', 'Response']
 const REQ_SUBTABS = ['Raw', 'Params', 'Headers']
 
@@ -30,10 +30,7 @@ export default function BurpProxyPanel({
   myLogs,
   selectedLog,
   onSelectLog,
-  interceptPending,
   proxyOn,
-  onForward,
-  onDrop,
   onClearHistory,
   username,
 }) {
@@ -91,27 +88,9 @@ export default function BurpProxyPanel({
             onClick={() => setPanelTab(tab)}
           >
             {tab}
-            {tab === 'Intercept' && interceptPending && proxyOn && (
-              <span className="burp-tab-badge">1</span>
-            )}
           </button>
         ))}
       </div>
-
-      {(panelTab === 'Intercept' || interceptPending) && proxyOn && interceptPending && (
-        <div className="burp-intercept-bar">
-          <div className="burp-intercept-title">
-            <span className="burp-intercept-pulse" />
-            Intercepted request — review before forwarding to server
-          </div>
-          <pre className="burp-intercept-preview">{buildHttpRaw(enrichLogEntry(interceptPending)).split('\n').slice(0, 6).join('\n')}…</pre>
-          <div className="burp-intercept-actions">
-            <button type="button" className="burp-btn-forward" onClick={onForward}>▶ Forward</button>
-            <button type="button" className="burp-btn-drop" onClick={onDrop}>✕ Drop</button>
-            <button type="button" className="burp-btn-outline" onClick={copyRaw}>Copy</button>
-          </div>
-        </div>
-      )}
 
       {panelTab === 'HTTP history' && (
         <>
@@ -265,18 +244,11 @@ export default function BurpProxyPanel({
         </>
       )}
 
-      {panelTab === 'Intercept' && !interceptPending && (
-        <div className="burp-intercept-idle">
-          <p>Intercept is {proxyOn ? 'ON' : 'OFF'} — waiting for next browser request.</p>
-          {!proxyOn && <p className="burp-empty">Turn on Proxy to capture & hold requests here.</p>}
-        </div>
-      )}
-
       {panelTab === 'Options' && (
         <div className="burp-options-panel">
           <h4>Proxy Options (Lab)</h4>
           <ul>
-            <li><strong>Intercept client requests:</strong> {proxyOn ? 'Enabled' : 'Disabled'}</li>
+            <li><strong>Proxy logging:</strong> {proxyOn ? 'Enabled' : 'Paused'}</li>
             <li><strong>Capture search queries:</strong> Enabled</li>
             <li><strong>Log student header:</strong> X-ICT-Student</li>
             <li><strong>Target scope:</strong> *.google.com (simulated)</li>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import PageShell from '../components/PageShell'
 import BurpProxyPanel from '../components/BurpProxyPanel'
-import { logBurpEvent, getBurpLogs, clearBurpLogs, removeBurpLog } from '../utils/burpSuiteLog'
+import { logBurpEvent, getBurpLogs, clearBurpLogs } from '../utils/burpSuiteLog'
 import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGoogleSearch'
 
 const HOME_URL = 'https://www.google.com/'
@@ -429,7 +429,6 @@ export default function BurpSuiteLab() {
   const [proxyOn, setProxyOn] = useState(true)
   const [useRealHtml, setUseRealHtml] = useState(false)
   const [viewSource, setViewSource] = useState(null)
-  const [interceptPending, setInterceptPending] = useState(null)
   const loggedOpen = useRef(false)
   const loadTimer = useRef(null)
   const historyIndexRef = useRef(0)
@@ -468,15 +467,11 @@ export default function BurpSuiteLab() {
   useEffect(() => {
     const handler = (e) => {
       refreshLogs()
-      const entry = e.detail
-      if (entry && proxyOn) {
-        setInterceptPending(entry)
-        setSelectedLog(entry)
-      }
+      if (e.detail) setSelectedLog(e.detail)
     }
     window.addEventListener('burp-log-update', handler)
     return () => window.removeEventListener('burp-log-update', handler)
-  }, [refreshLogs, proxyOn])
+  }, [refreshLogs])
 
   useEffect(() => () => {
     if (loadTimer.current) clearTimeout(loadTimer.current)
@@ -693,20 +688,8 @@ export default function BurpSuiteLab() {
     capture({ action: 'click', method: 'GET', url: '/open-external', query: q, target: 'Open Live Google', host: 'www.google.com', details: `window.open → ${liveUrl}` })
   }
 
-  const handleForwardIntercept = () => setInterceptPending(null)
-
-  const handleDropIntercept = () => {
-    if (interceptPending) {
-      removeBurpLog(interceptPending.id)
-      setInterceptPending(null)
-      refreshLogs()
-      setSelectedLog(null)
-    }
-  }
-
   const handleClearBurpHistory = () => {
     clearBurpLogs()
-    setInterceptPending(null)
     setSelectedLog(null)
     refreshLogs()
   }
@@ -852,10 +835,7 @@ export default function BurpSuiteLab() {
           myLogs={myLogs}
           selectedLog={selectedLog}
           onSelectLog={setSelectedLog}
-          interceptPending={interceptPending}
           proxyOn={proxyOn}
-          onForward={handleForwardIntercept}
-          onDrop={handleDropIntercept}
           onClearHistory={handleClearBurpHistory}
           username={username}
         />
