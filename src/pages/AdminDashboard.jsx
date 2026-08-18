@@ -6,6 +6,7 @@ import { getAllStudentAccounts, saveStudentAccount, bulkSaveStudentAccounts } fr
 import { getPasswordStrength } from '../utils/passwordStrength'
 import { getLabCompletionStats, exportProgressJson } from '../utils/classProgress'
 import { getBurpStats, clearBurpLogs } from '../utils/burpSuiteLog'
+import { getChallengeStats } from '../utils/burpChallengeProgress'
 import { generateReportCard } from '../utils/reportCard'
 import { buildStudentLoginUrl, generateQrDataUrl } from '../utils/qrLogin'
 import { ICT_SESSION } from '../data/sessionPlan'
@@ -102,6 +103,7 @@ export default function AdminDashboard() {
   const [refresh, setRefresh] = useState(0)
   const [labStats, setLabStats] = useState(() => getLabCompletionStats())
   const [burpStats, setBurpStats] = useState(() => getBurpStats())
+  const [challengeStats, setChallengeStats] = useState(() => getChallengeStats())
   const [qrStudent, setQrStudent] = useState(null)
 
   const students = useMemo(() => getAllStudents(), [refresh])
@@ -111,12 +113,14 @@ export default function AdminDashboard() {
     setRefresh((n) => n + 1)
     setLabStats(getLabCompletionStats())
     setBurpStats(getBurpStats())
+    setChallengeStats(getChallengeStats())
   }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
       setLabStats(getLabCompletionStats())
       setBurpStats(getBurpStats())
+      setChallengeStats(getChallengeStats())
     }, 4000)
     return () => clearInterval(id)
   }, [])
@@ -301,7 +305,24 @@ export default function AdminDashboard() {
           <div className="stat-card"><span className="stat-icon">🌐</span><div><div className="stat-value">{burpStats.uniqueOpeners}</div><div className="stat-label">Opened Lab</div></div></div>
           <div className="stat-card"><span className="stat-icon">🔍</span><div><div className="stat-value">{burpStats.searchCount}</div><div className="stat-label">Searches</div></div></div>
           <div className="stat-card"><span className="stat-icon">📡</span><div><div className="stat-value">{burpStats.totalEvents}</div><div className="stat-label">Total Requests</div></div></div>
+          <div className="stat-card"><span className="stat-icon">🏁</span><div><div className="stat-value">{challengeStats.fullyComplete}</div><div className="stat-label">Challenge Done (3/3)</div></div></div>
         </div>
+        {challengeStats.students.length > 0 && (
+          <div className="admin-burp-top-queries">
+            <strong>Challenge progress:</strong>
+            <div className="admin-burp-query-chips">
+              {challengeStats.students.slice(0, 12).map((s) => (
+                <span key={s.username} className="admin-burp-chip">
+                  {s.studentName}{' '}
+                  <small>
+                    ({[s.task1, s.task2, s.task3].filter(Boolean).length}/3
+                    {s.completedAt ? ' ✓' : ''})
+                  </small>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         {burpStats.topQueries.length > 0 && (
           <div className="admin-burp-top-queries">
             <strong>Top search queries:</strong>

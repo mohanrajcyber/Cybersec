@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAuth } from '../context/AuthContext'
 import PageShell from '../components/PageShell'
 import BurpProxyPanel from '../components/BurpProxyPanel'
+import BurpChallengePanel from '../components/BurpChallengePanel'
 import { logBurpEvent, getBurpLogs, clearBurpLogs } from '../utils/burpSuiteLog'
 import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGoogleSearch'
 
@@ -320,7 +321,12 @@ function GoogleResults({ query, searchInput, setSearchInput, onSearch, onNavClic
 
           <div className="burp-g-results-list">
             {results.map((r) => (
-              <button key={`${r.url}-${r.title}`} type="button" className="burp-g-result-item" onClick={() => onResultClick(r.title, r.url)}>
+              <button
+                key={`${r.url}-${r.title}`}
+                type="button"
+                className={`burp-g-result-item ${r.suspicious ? 'burp-g-result-item--suspicious' : ''}`}
+                onClick={() => onResultClick(r.title, r.url)}
+              >
                 <div className="burp-g-result-favicon">{r.favicon || '🌐'}</div>
                 <div>
                   <cite>{r.url.replace(/^https?:\/\//, '')}</cite>
@@ -694,6 +700,10 @@ export default function BurpSuiteLab() {
     refreshLogs()
   }
 
+  const handleChallengeComplete = useCallback(() => {
+    completeLab('burp-suite')
+  }, [completeLab])
+
   const myLogs = logs.filter((l) => l.studentUsername === username)
   const sessionStats = {
     requests: myLogs.length,
@@ -758,7 +768,7 @@ export default function BurpSuiteLab() {
     <PageShell
       icon="🔶"
       title="Burp Suite Proxy Lab"
-      description="Real Google 2026 interface — AI Mode, search chips, results & Burp intercept. Every click and search logged for trainer review."
+      description="Real Google 2026 interface — AI Mode, search chips, results & Burp intercept. Complete 3 Challenge Mode tasks below."
       badge="HTTP Intercept · Lab Safe"
       badgeVariant="safe"
       detailsSections={[
@@ -840,6 +850,13 @@ export default function BurpSuiteLab() {
           username={username}
         />
       </div>
+
+      <BurpChallengePanel
+        myLogs={myLogs}
+        username={username}
+        studentName={displayName}
+        onAllComplete={handleChallengeComplete}
+      />
     </PageShell>
   )
 }

@@ -4651,6 +4651,85 @@ body.war-room-open { overflow: hidden; background: #050810; }
 .burp-action-tag.search { background: #1e3a8a; color: #93c5fd; }
 .burp-action-tag.click { background: #14532d; color: #86efac; }
 .burp-action-tag.lab_open { background: #581c87; color: #e9d5ff; }
+.burp-action-tag.challenge_submit { background: #92400e; color: #fde68a; }
+
+.burp-g-result-item--suspicious {
+  border: 2px solid #f97316 !important; border-radius: 8px; background: #fff7ed !important;
+  margin-bottom: 0.35rem; padding: 0.65rem 0.5rem !important;
+}
+.burp-g-result-item--suspicious cite { color: #c2410c !important; font-weight: 600; }
+.burp-g-result-item--suspicious strong { color: #9a3412 !important; }
+
+/* Burp Challenge Mode */
+.burp-challenge-panel {
+  margin-top: 1rem; border-radius: var(--radius); border: 1px solid #fdba74;
+  background: linear-gradient(180deg, #fffbeb, #fff7ed); overflow: hidden;
+}
+[data-theme="dark"] .burp-challenge-panel {
+  background: linear-gradient(180deg, #292524, #1c1917); border-color: #9a3412;
+}
+.burp-challenge-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.75rem 1rem; border: none; background: transparent; cursor: pointer; text-align: left;
+}
+.burp-challenge-head-left { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
+.burp-challenge-badge {
+  font-size: 0.625rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.2rem 0.5rem; border-radius: 999px; background: #ea580c; color: #fff;
+}
+.burp-challenge-progress { font-size: 0.75rem; color: var(--text-2); }
+.burp-challenge-toggle { font-size: 0.75rem; color: #ea580c; font-weight: 600; white-space: nowrap; }
+.burp-challenge-done-banner {
+  margin: 0 1rem 0.75rem; padding: 0.65rem 0.85rem; border-radius: 8px;
+  background: #dcfce7; border: 1px solid #86efac; color: #166534; font-size: 0.8125rem; font-weight: 600;
+}
+[data-theme="dark"] .burp-challenge-done-banner { background: #14532d; border-color: #22c55e; color: #bbf7d0; }
+.burp-challenge-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+.burp-challenge-card {
+  border-radius: 10px; border: 1px solid #fed7aa; background: #fff; padding: 0.85rem;
+  display: flex; flex-direction: column; gap: 0.55rem;
+}
+[data-theme="dark"] .burp-challenge-card { background: #292524; border-color: #78350f; }
+.burp-challenge-card.done { border-color: #86efac; background: #f0fdf4; }
+[data-theme="dark"] .burp-challenge-card.done { background: #14532d33; border-color: #22c55e; }
+.burp-challenge-card-head { display: flex; align-items: flex-start; gap: 0.55rem; }
+.burp-challenge-num {
+  width: 26px; height: 26px; border-radius: 50%; background: #ea580c; color: #fff;
+  font-size: 0.8125rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.burp-challenge-card.done .burp-challenge-num { background: #16a34a; }
+.burp-challenge-card-head h3 { margin: 0; font-size: 0.875rem; line-height: 1.3; }
+.burp-challenge-ta { margin: 0.15rem 0 0; font-size: 0.6875rem; color: var(--text-2); }
+.burp-challenge-check { margin-left: auto; font-size: 0.6875rem; font-weight: 700; color: #16a34a; white-space: nowrap; }
+.burp-challenge-steps {
+  margin: 0; padding-left: 1.1rem; font-size: 0.75rem; line-height: 1.55; color: var(--text-2);
+}
+.burp-challenge-hint {
+  margin: 0; font-size: 0.6875rem; color: #92400e; background: #ffedd5; padding: 0.4rem 0.5rem; border-radius: 6px;
+}
+[data-theme="dark"] .burp-challenge-hint { background: #431407; color: #fdba74; }
+.burp-challenge-question { margin: 0 0 0.35rem; font-size: 0.75rem; font-weight: 600; }
+.burp-challenge-options { display: flex; flex-direction: column; gap: 0.35rem; }
+.burp-challenge-option {
+  display: flex; align-items: flex-start; gap: 0.4rem; font-size: 0.6875rem; line-height: 1.45; cursor: pointer;
+}
+.burp-challenge-option input { margin-top: 0.15rem; flex-shrink: 0; accent-color: #ea580c; }
+.burp-challenge-input {
+  width: 100%; padding: 0.45rem 0.55rem; border-radius: 6px; border: 1px solid #fdba74;
+  font-size: 0.75rem; font-family: var(--mono); background: #fff;
+}
+[data-theme="dark"] .burp-challenge-input { background: #1c1917; border-color: #78350f; color: #fafaf9; }
+.burp-challenge-feedback { margin: 0; font-size: 0.6875rem; font-weight: 600; }
+.burp-challenge-feedback.error { color: #dc2626; }
+.burp-challenge-feedback.success { color: #16a34a; }
+.burp-challenge-submit { align-self: flex-start; margin-top: auto; }
+
+@media (max-width: 960px) {
+  .burp-challenge-grid { grid-template-columns: 1fr; }
+}
 
 .admin-burp-panel { margin-top: 1rem; }
 .admin-burp-stats { margin: 0.75rem 0; }

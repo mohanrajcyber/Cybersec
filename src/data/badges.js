@@ -12,6 +12,7 @@ export const BADGES = [
   { id: 'hash', icon: '🔢', name: 'Crypto Basics', lab: 'hash' },
   { id: 'firewall', icon: '🧱', name: 'Firewall Admin', lab: 'firewall' },
   { id: 'enumeration', icon: '🔎', name: 'Enum Expert', lab: 'enumeration' },
+  { id: 'burp', icon: '🔶', name: 'Burp Proxy Pro', lab: 'burp-suite' },
   { id: 'explorer', icon: '🌟', name: 'Lab Explorer', minLabs: 15 },
   { id: 'master', icon: '👑', name: 'Cyber Master', minLabs: 30 },
 ]

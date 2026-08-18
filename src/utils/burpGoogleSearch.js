@@ -1,5 +1,18 @@
 /** Smart Google search simulation — query-relevant results for Burp Suite lab */
 
+import { SUSPICIOUS_URL } from '../data/burpChallengeTasks'
+
+function challengePhishingResult(query) {
+  return resultItem({
+    title: 'Auxilium College — Student Portal Login (URGENT)',
+    url: SUSPICIOUS_URL,
+    favicon: '⚠️',
+    snippet: `Your student portal session expired. Sign in now to view semester results for "${query}". This link looks official but inspect the Host in Burp.`,
+    date: 'Ad · Suspicious',
+    suspicious: true,
+  })
+}
+
 function normalizeQuery(query) {
   return String(query || '').trim().toLowerCase().replace(/\s+/g, ' ')
 }
@@ -269,6 +282,15 @@ function generateDynamicResults(query) {
   return { resultCount: count, seconds, knowledgePanel, results, peopleAlsoAsk, relatedSearches }
 }
 
+function withChallengeResult(results, query) {
+  const phishing = challengePhishingResult(query)
+  const mapped = results.map((r) => ({
+    ...r,
+    snippet: highlightSnippet(r.snippet, query),
+  }))
+  return [phishing, ...mapped]
+}
+
 export function buildGoogleSearchResponse(query) {
   const curated = findCurated(query)
   if (curated) {
@@ -277,10 +299,7 @@ export function buildGoogleSearchResponse(query) {
       resultCount: 2_400_000 + (h % 12_000_000),
       seconds: `0.${22 + (h % 38)}`,
       knowledgePanel: curated.knowledgePanel || null,
-      results: curated.results.map((r) => ({
-        ...r,
-        snippet: highlightSnippet(r.snippet, query),
-      })),
+      results: withChallengeResult(curated.results, query),
       peopleAlsoAsk: curated.peopleAlsoAsk,
       relatedSearches: curated.relatedSearches,
     }
@@ -289,10 +308,7 @@ export function buildGoogleSearchResponse(query) {
   const dynamic = generateDynamicResults(query)
   return {
     ...dynamic,
-    results: dynamic.results.map((r) => ({
-      ...r,
-      snippet: highlightSnippet(r.snippet, query),
-    })),
+    results: withChallengeResult(dynamic.results, query),
   }
 }
 
@@ -406,6 +422,19 @@ export function buildSitePageContent(page) {
       heading: `Discussions about ${titleCase(q)}`,
       body: 'Community questions, answers and threads from users worldwide.',
       sections: [],
+    }
+  }
+
+  if (host.includes('secure-auxilium-login') || host.includes('auxilium-login')) {
+    return {
+      host,
+      favicon: '⚠️',
+      heading: 'Student Portal — Sign In',
+      body: '⚠️ SIMULATED PHISHING PAGE — This domain is NOT the real Auxilium College website. In Burp Suite, check the Host column: secure-auxilium-login.xyz is a fake domain designed to steal credentials.',
+      sections: [
+        { h: 'Red flags', p: 'Urgent language, unofficial domain (.xyz), no HTTPS padlock trust, login form on unknown host.' },
+        { h: 'Lab task', p: 'Find this Host name in Burp HTTP History and submit it in Challenge Mode Task 3.' },
+      ],
     }
   }
 
