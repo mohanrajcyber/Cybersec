@@ -4250,13 +4250,93 @@ body.war-room-open { overflow: hidden; background: #050810; }
   display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.65rem;
   background: #e8eaed; border-bottom: 1px solid #dadce0;
 }
+.burp-browser-chrome-v2 { flex-wrap: wrap; }
+.burp-window-dots { display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0; }
+.burp-window-dots .dot.red { background: #ff5f57; }
+.burp-window-dots .dot.yellow { background: #febc2e; }
+.burp-window-dots .dot.green { background: #28c840; }
+.burp-nav-btns { display: flex; align-items: center; gap: 0.15rem; flex-shrink: 0; }
+.burp-nav-btn {
+  width: 28px; height: 28px; border: none; border-radius: 50%; background: transparent;
+  color: #5f6368; font-size: 0.9375rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.burp-nav-btn:hover:not(:disabled) { background: rgba(60, 64, 67, 0.1); color: #202124; }
+.burp-nav-btn:disabled { opacity: 0.35; cursor: default; }
 .burp-url-bar {
   flex: 1; display: flex; align-items: center; gap: 0.35rem;
   padding: 0.35rem 0.65rem; border-radius: 999px; background: #fff;
   font-size: 0.6875rem; color: #202124; font-family: var(--mono); overflow: hidden;
-  white-space: nowrap; text-overflow: ellipsis;
+  white-space: nowrap; text-overflow: ellipsis; min-width: 0;
 }
-.burp-lock { font-size: 0.625rem; }
+.burp-url-bar-editable { padding-right: 0.45rem; }
+.burp-url-input {
+  flex: 1; min-width: 0; border: none; background: transparent; outline: none;
+  font-size: 0.6875rem; color: #202124; font-family: var(--mono);
+}
+.burp-url-spinner {
+  width: 14px; height: 14px; border: 2px solid #dadce0; border-top-color: #1a73e8;
+  border-radius: 50%; animation: burpSpin 0.7s linear infinite; flex-shrink: 0;
+}
+.burp-tab-title {
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 0.625rem; color: #5f6368; flex-shrink: 0;
+}
+.burp-browser-viewport {
+  position: relative; max-height: 560px; overflow-y: auto; overflow-x: hidden;
+  background: #fff;
+}
+.burp-browser-loading {
+  min-height: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem; color: #5f6368; font-size: 0.875rem;
+}
+.burp-load-spinner {
+  width: 36px; height: 36px; border: 3px solid #e8eaed; border-top-color: #4285f4;
+  border-radius: 50%; animation: burpSpin 0.8s linear infinite;
+}
+@keyframes burpSpin { to { transform: rotate(360deg); } }
+
+.burp-site-page { min-height: 420px; text-align: left; background: #fff; }
+.burp-site-toolbar {
+  display: flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1rem;
+  border-bottom: 1px solid #e8eaed; background: #f8f9fa; font-size: 0.8125rem;
+}
+.burp-site-host { color: #202124; font-weight: 600; }
+.burp-site-content { padding: 1.5rem 1.25rem; max-width: 640px; }
+.burp-site-content h1 { font-size: 1.5rem; font-weight: 400; color: #202124; margin: 0 0 0.75rem; }
+.burp-site-content p { font-size: 0.9375rem; line-height: 1.6; color: #4d5156; margin: 0 0 1rem; }
+.burp-site-card {
+  margin-top: 1rem; padding: 1rem; border-radius: 8px; background: #f1f3f4;
+  border: 1px solid #e8eaed; font-size: 0.8125rem;
+}
+.burp-site-card code { font-family: var(--mono); font-size: 0.75rem; word-break: break-all; }
+.burp-site-note { margin: 0.5rem 0 0 !important; font-size: 0.75rem !important; color: #70757a !important; }
+
+.burp-gmail-page {
+  min-height: 420px; display: flex; align-items: center; justify-content: center;
+  background: #f0f4f9; padding: 1.5rem;
+}
+.burp-gmail-card {
+  width: 100%; max-width: 400px; background: #fff; border-radius: 8px;
+  padding: 2rem 2.25rem; box-shadow: 0 1px 3px rgba(60, 64, 67, 0.2);
+  text-align: center;
+}
+.burp-gmail-card h2 { font-size: 1.5rem; font-weight: 400; margin: 1rem 0 0.25rem; color: #202124; }
+.burp-gmail-card > p { color: #5f6368; font-size: 0.9375rem; margin: 0 0 1.5rem; }
+.burp-gmail-field { text-align: left; margin-bottom: 1.25rem; }
+.burp-gmail-field label { display: block; font-size: 0.75rem; color: #1a73e8; margin-bottom: 0.35rem; }
+.burp-gmail-field input {
+  width: 100%; border: none; border-bottom: 1px solid #dadce0; padding: 0.5rem 0;
+  font-size: 1rem; outline: none;
+}
+.burp-gmail-next {
+  float: right; background: #1a73e8; color: #fff; border: none; border-radius: 4px;
+  padding: 0.5rem 1.25rem; font-size: 0.875rem; font-weight: 500; cursor: pointer;
+}
+.burp-gmail-hint { clear: both; padding-top: 1.5rem; font-size: 0.75rem; color: #70757a; margin: 0; }
+
+.burp-req-host { font-size: 0.6875rem; color: #78716c; font-weight: 600; }
+
+.burp-lock { font-size: 0.625rem; flex-shrink: 0; }
 
 .burp-browser-wrap--google { border: none; box-shadow: 0 1px 6px rgba(32, 33, 36, 0.18); }
 .burp-google-page { min-height: 520px; background: #fff; color: #202124; display: flex; flex-direction: column; font-family: arial, sans-serif; }

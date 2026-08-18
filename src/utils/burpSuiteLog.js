@@ -26,6 +26,7 @@ export function logBurpEvent({
   query = '',
   target = '',
   details = '',
+  host = 'www.google.com',
   userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Lab Browser',
 }) {
   const entry = {
@@ -40,6 +41,7 @@ export function logBurpEvent({
     query,
     target,
     details,
+    host,
     userAgent: userAgent.slice(0, 120),
   }
 
@@ -100,8 +102,8 @@ export function clearBurpLogs() {
 }
 
 export function buildHttpRaw(entry) {
-  const host = 'www.google.com'
-  const path = entry.query
+  const host = entry.host || 'www.google.com'
+  const path = entry.query && host.includes('google')
     ? `/search?q=${encodeURIComponent(entry.query)}&hl=en&source=hp`
     : entry.url || '/'
   const lines = [
