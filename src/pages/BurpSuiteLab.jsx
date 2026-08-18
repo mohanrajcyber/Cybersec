@@ -4,6 +4,7 @@ import PageShell from '../components/PageShell'
 import BurpProxyPanel from '../components/BurpProxyPanel'
 import BurpChallengePanel from '../components/BurpChallengePanel'
 import { logBurpEvent, getBurpLogs, clearBurpLogs } from '../utils/burpSuiteLog'
+import { isCloudSyncEnabled } from '../utils/burpCloudSync'
 import { buildGoogleSearchResponse, buildSitePageContent } from '../utils/burpGoogleSearch'
 
 const HOME_URL = 'https://www.google.com/'
@@ -788,6 +789,9 @@ export default function BurpSuiteLab() {
         <div className="burp-session-stats">
           <span>Your session: <strong>{sessionStats.requests}</strong> requests</span>
           <span>Searches: <strong>{sessionStats.searches}</strong></span>
+          {isCloudSyncEnabled() && (
+            <span className="burp-cloud-sync-badge" title="Logs sync to trainer admin panel">☁️ Trainer sync ON</span>
+          )}
         </div>
         <div className="burp-mode-toggle">
           <button

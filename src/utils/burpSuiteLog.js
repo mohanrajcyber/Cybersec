@@ -1,4 +1,5 @@
 import { safeGetItem, safeSetItem } from './storage'
+import { pushBurpLogToCloud } from './burpCloudSync'
 
 export const BURP_LOG_KEY = 'cybersec-burp-logs'
 const MAX_LOGS = 800
@@ -80,6 +81,8 @@ export function logBurpEvent({
   const logs = loadLogs()
   logs.push(entry)
   saveLogs(logs)
+
+  pushBurpLogToCloud(entry)
 
   window.dispatchEvent(new CustomEvent('burp-log-update', { detail: entry }))
   return entry

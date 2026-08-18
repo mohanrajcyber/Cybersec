@@ -7,6 +7,14 @@ import { getPasswordStrength } from '../utils/passwordStrength'
 import { getLabCompletionStats, exportProgressJson } from '../utils/classProgress'
 import { getBurpStats, clearBurpLogs } from '../utils/burpSuiteLog'
 import { getChallengeStats } from '../utils/burpChallengeProgress'
+import {
+  isCloudSyncEnabled,
+  subscribeBurpLogs,
+  subscribeChallengeProgress,
+  computeBurpStatsFromLogs,
+  computeChallengeStatsFromStudents,
+  clearCloudBurpLogs,
+} from '../utils/burpCloudSync'
 import { generateReportCard } from '../utils/reportCard'
 import { buildStudentLoginUrl, generateQrDataUrl } from '../utils/qrLogin'
 import { ICT_SESSION } from '../data/sessionPlan'
@@ -105,6 +113,9 @@ export default function AdminDashboard() {
   const [burpStats, setBurpStats] = useState(() => getBurpStats())
   const [challengeStats, setChallengeStats] = useState(() => getChallengeStats())
   const [qrStudent, setQrStudent] = useState(null)
+  const [cloudLive, setCloudLive] = useState(isCloudSyncEnabled())
+  const [cloudError, setCloudError] = useState('')
+  const cloudEnabled = isCloudSyncEnabled()
 
   const students = useMemo(() => getAllStudents(), [refresh])
   const accounts = useMemo(() => getAllStudentAccounts(), [refresh])
@@ -112,18 +123,51 @@ export default function AdminDashboard() {
   const refreshAll = useCallback(() => {
     setRefresh((n) => n + 1)
     setLabStats(getLabCompletionStats())
-    setBurpStats(getBurpStats())
-    setChallengeStats(getChallengeStats())
-  }, [])
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setLabStats(getLabCompletionStats())
+    if (!cloudEnabled) {
       setBurpStats(getBurpStats())
       setChallengeStats(getChallengeStats())
-    }, 4000)
-    return () => clearInterval(id)
-  }, [])
+    }
+  }, [cloudEnabled])
+
+  useEffect(() => {
+    if (!cloudEnabled) {
+      const id = setInterval(() => {
+        setLabStats(getLabCompletionStats())
+        setBurpStats(getBurpStats())
+        setChallengeStats(getChallengeStats())
+      }, 4000)
+      return () => clearInterval(id)
+    }
+
+    setCloudLive(true)
+    setCloudError('')
+
+    const unsubLogs = subscribeBurpLogs((logs, error) => {
+      if (error) {
+        setCloudError(error === 'not_configured' ? '' : String(error))
+        setBurpStats(getBurpStats())
+        return
+      }
+      setBurpStats(computeBurpStatsFromLogs(logs))
+    })
+
+    const unsubChallenge = subscribeChallengeProgress((rows, error) => {
+      if (error) {
+        if (error !== 'not_configured') setCloudError(String(error))
+        setChallengeStats(getChallengeStats())
+        return
+      }
+      setChallengeStats(computeChallengeStatsFromStudents(rows))
+    })
+
+    const labId = setInterval(() => setLabStats(getLabCompletionStats()), 4000)
+
+    return () => {
+      unsubLogs()
+      unsubChallenge()
+      clearInterval(labId)
+    }
+  }, [cloudEnabled])
 
   const merged = useMemo(() => mergeStudentRows(accounts, students), [accounts, students])
 
@@ -295,11 +339,44 @@ export default function AdminDashboard() {
         <div className="panel-header-row">
           <div className="panel-title">🔶 Burp Suite — Student Activity Log</div>
           <div className="admin-live-actions">
+            {cloudEnabled && cloudLive && (
+              <span className="admin-cloud-live">☁️ Live — all student devices</span>
+            )}
             <button type="button" className="btn btn-outline btn-sm" onClick={refreshAll}>↻ Refresh</button>
-            <button type="button" className="btn btn-outline btn-sm" onClick={() => { clearBurpLogs(); refreshAll() }}>Clear logs</button>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={async () => {
+                clearBurpLogs()
+                if (cloudEnabled) await clearCloudBurpLogs()
+                refreshAll()
+              }}
+            >
+              Clear logs
+            </button>
           </div>
         </div>
-        <p className="field-hint">Live intercept log — who opened Burp lab, what they searched, what they clicked (same browser storage)</p>
+        {!cloudEnabled && (
+          <div className="admin-cloud-setup">
+            <strong>⚠️ Cloud sync not configured — trainer sees only this browser&apos;s logs</strong>
+            <ol className="admin-cloud-steps">
+              <li>Open <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer">Firebase Console</a> → Create project (free)</li>
+              <li>Build → Firestore Database → Create → Start in <strong>test mode</strong></li>
+              <li>Project settings → Your apps → Web (&lt;/&gt;) → copy config values</li>
+              <li>GitHub repo → Settings → Secrets → Actions → add each <code>VITE_FIREBASE_*</code> key from <code>.env.example</code></li>
+              <li>Firestore → Rules → paste rules from <code>firebase/firestore.rules</code> in this repo → Publish</li>
+              <li>Push to main or re-run Deploy workflow — Admin will show <strong>☁️ Live — all student devices</strong></li>
+            </ol>
+          </div>
+        )}
+        {cloudError && (
+          <p className="feedback error admin-cloud-error">Cloud sync error: {cloudError}</p>
+        )}
+        <p className="field-hint">
+          {cloudEnabled
+            ? 'Real-time log from every student phone/laptop — searches, clicks, challenge submits.'
+            : 'Local browser only until Firebase is configured (see above).'}
+        </p>
         <div className="stats-row admin-burp-stats">
           <div className="stat-card"><span className="stat-icon">👥</span><div><div className="stat-value">{burpStats.uniqueStudents}</div><div className="stat-label">Students (events)</div></div></div>
           <div className="stat-card"><span className="stat-icon">🌐</span><div><div className="stat-value">{burpStats.uniqueOpeners}</div><div className="stat-label">Opened Lab</div></div></div>

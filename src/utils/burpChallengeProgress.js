@@ -1,5 +1,6 @@
 import { safeGetItem, safeSetItem } from './storage'
 import { logBurpEvent } from './burpSuiteLog'
+import { pushChallengeProgressToCloud } from './burpCloudSync'
 
 export const BURP_CHALLENGE_KEY = 'cybersec-burp-challenge'
 
@@ -46,6 +47,8 @@ export function markTaskComplete(username, studentName, taskId) {
 
   all[username] = row
   saveAll(all)
+
+  pushChallengeProgressToCloud(username, row)
 
   logBurpEvent({
     studentUsername: username,

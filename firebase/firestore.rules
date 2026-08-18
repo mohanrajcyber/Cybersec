@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /burp_logs/{logId} {
+      allow read, write: if true;
+    }
+    match /challenge_progress/{username} {
+      allow read, write: if true;
+    }
+  }
+}
